@@ -1,7 +1,7 @@
 const mysql = require('mysql2/promise');
 const bcrypt = require('bcryptjs');
 
-const DATABASE_URL = "mysql://root:pVmePGsGbGueeHjOKDXqvQZkkLDUCDDH@switchyard.proxy.rlwy.net:16853/railway";
+const DATABASE_URL = process.env.DATABASE_URL;
 
 async function seed() {
   const connection = await mysql.createConnection(DATABASE_URL);
