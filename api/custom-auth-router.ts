@@ -30,7 +30,7 @@ export const customAuthRouter = createRouter({
       if (existing) {
         throw new TRPCError({
           code: "CONFLICT",
-          message: "Email already registered",
+          message: "Email already registered. Please sign in instead.",
         });
       }
 
