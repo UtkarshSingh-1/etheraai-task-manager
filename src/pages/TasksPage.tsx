@@ -163,6 +163,19 @@ export default function TasksPage() {
                     </SelectContent>
                   </Select>
                 </div>
+                <div>
+                  <label className="text-sm font-medium text-[#5B0E14] block mb-1.5">Assign To</label>
+                  <Select value={assigneeId} onValueChange={setAssigneeId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a team member" />
+                    </SelectTrigger>
+                    <SelectContent position="popper" className="max-h-96">
+                      {(users ?? []).map((u) => (
+                        <SelectItem key={u.id} value={String(u.id)}>
+                          {u.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
                   </Select>
                 </div>
                 <div>
@@ -210,17 +223,32 @@ export default function TasksPage() {
                 value={editTask.description || ""} 
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setEditTask({...editTask, description: e.target.value})} 
               />
-                  </Select>
-                </div>
-                <div>
-                  <label className="text-sm font-medium text-[#5B0E14] block mb-1.5">Deadline</label>
-                  <Input 
-                    type="date" 
-                    value={editTask.dueDate?.split('T')[0] || ""} 
-                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditTask({...editTask, dueDate: e.target.value})} 
-                  />
-                </div>
-                <Button type="submit" className="w-full bg-[#5B0E14] text-[#F1E194]" disabled={updateMutation.isPending}>
+              <div>
+                <label className="text-sm font-medium text-[#5B0E14] block mb-1.5">Reassign To</label>
+                <Select 
+                  value={editTask.assignedTo?.toString()} 
+                  onValueChange={(val) => setEditTask({...editTask, assignedTo: val === "null" ? null : Number(val)})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select team member" />
+                  </SelectTrigger>
+                  <SelectContent position="popper" className="max-h-96">
+                    <SelectItem value="null">Unassigned</SelectItem>
+                    {(users ?? []).map((u) => (
+                      <SelectItem key={u.id} value={u.id.toString()}>{u.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
+              <div>
+                <label className="text-sm font-medium text-[#5B0E14] block mb-1.5">Deadline</label>
+                <Input 
+                  type="date" 
+                  value={editTask.dueDate?.split('T')[0] || ""} 
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditTask({...editTask, dueDate: e.target.value})} 
+                />
+              </div>
+              <Button type="submit" className="w-full bg-[#5B0E14] text-[#F1E194]" disabled={updateMutation.isPending}>
                 Save Changes
               </Button>
             </form>
