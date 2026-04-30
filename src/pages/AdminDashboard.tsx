@@ -16,7 +16,7 @@ const cardVariants = {
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.08, duration: 0.35 },
+    transition: { delay: i * 0.05, duration: 0.2 },
   }),
 };
 
@@ -77,7 +77,7 @@ export default function AdminDashboard() {
         <motion.div
           initial={{ opacity: 0, y: 16 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.4 }}
+          transition={{ delay: 0.1 }}
           className="lg:col-span-2 bg-white rounded-xl border border-neutral-200 p-6 shadow-sm"
         >
           <div className="flex items-center justify-between mb-6">
@@ -115,7 +115,7 @@ export default function AdminDashboard() {
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
+            transition={{ delay: 0.2 }}
             className="bg-white rounded-xl border border-neutral-200 p-6 shadow-sm"
           >
             <h2 className="text-sm font-bold text-[#5B0E14] uppercase tracking-wider mb-4">Recent Projects</h2>
@@ -136,7 +136,7 @@ export default function AdminDashboard() {
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
+            transition={{ delay: 0.3 }}
             className="bg-[#5B0E14] rounded-xl p-6 shadow-lg shadow-black/10"
           >
             <h2 className="text-sm font-bold text-[#F1E194] uppercase tracking-wider mb-4">Urgent Tasks</h2>

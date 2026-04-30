@@ -43,7 +43,7 @@ export default function Home() {
         <motion.div
           initial={{ opacity: 0, y: 24 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
+          transition={{ duration: 0.2 }}
           className="text-center max-w-2xl mx-auto"
         >
           <h1 className="text-5xl font-bold text-neutral-900 leading-tight mb-5">
@@ -72,7 +72,7 @@ export default function Home() {
         <motion.div
           initial={{ opacity: 0, y: 32 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5, delay: 0.15 }}
+          transition={{ duration: 0.2, delay: 0.05 }}
           className="mt-20 grid grid-cols-1 md:grid-cols-3 gap-6"
         >
           {[
@@ -84,7 +84,7 @@ export default function Home() {
               key={feature.title}
               initial={{ opacity: 0, y: 16 }}
               animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: 0.25 + i * 0.08 }}
+              transition={{ delay: 0.1 + i * 0.05 }}
               className="p-6 rounded-2xl border border-neutral-200 bg-white"
             >
               <h3 className="text-sm font-semibold text-neutral-900 mb-2">{feature.title}</h3>

@@ -233,7 +233,7 @@ export default function TasksPage() {
               initial={{ opacity: 0, x: -10 }}
               animate={{ opacity: 1, x: 0 }}
               exit={{ opacity: 0, scale: 0.95 }}
-              transition={{ delay: i * 0.03 }}
+              transition={{ delay: i * 0.02 }}
               className="bg-white rounded-2xl border border-neutral-200 p-5 flex items-center gap-5 hover:border-[#5B0E14]/30 hover:shadow-md transition-all duration-200"
             >
               <button

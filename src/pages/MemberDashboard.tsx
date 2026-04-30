@@ -15,7 +15,7 @@ const cardVariants = {
   visible: (i: number) => ({
     opacity: 1,
     y: 0,
-    transition: { delay: i * 0.08, duration: 0.35 },
+    transition: { delay: i * 0.05, duration: 0.2 },
   }),
 };
 
@@ -77,7 +77,7 @@ export default function MemberDashboard() {
           <motion.div
             initial={{ opacity: 0, y: 16 }}
             animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.3 }}
+            transition={{ delay: 0.15 }}
             className="bg-[#5B0E14] rounded-3xl p-8 text-[#F1E194] shadow-xl shadow-black/10 relative overflow-hidden"
           >
             <div className="relative z-10">
