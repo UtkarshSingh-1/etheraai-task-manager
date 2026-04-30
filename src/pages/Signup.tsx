@@ -39,7 +39,7 @@ export default function Signup() {
       toast.success("Verification code sent to your email!");
       setStep("otp");
     },
-    onError: (err) => {
+    onError: (err: any) => {
       toast.error(err.message);
     },
   });
@@ -49,7 +49,7 @@ export default function Signup() {
       toast.success("Account created successfully!");
       navigate("/login");
     },
-    onError: (err) => {
+    onError: (err: any) => {
       toast.error(err.message);
     },
   });
