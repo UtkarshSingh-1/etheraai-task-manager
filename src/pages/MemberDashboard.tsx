@@ -8,7 +8,9 @@ import {
   ArrowRight
 } from "lucide-react";
 import { Link } from "react-router";
+import { Clock, Circle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
+import { toast } from "sonner";
 
 const cardVariants = {
   hidden: { opacity: 0, y: 16 },
@@ -21,8 +23,16 @@ const cardVariants = {
 
 export default function MemberDashboard() {
   const { user } = useAuth();
+  const utils = trpc.useUtils();
   const { data: tasks, isLoading: tasksLoading } = trpc.tasks.list.useQuery();
   const { data: projects, isLoading: projectsLoading } = trpc.projects.list.useQuery();
+
+  const updateStatusMutation = trpc.tasks.updateStatus.useMutation({
+    onSuccess: () => {
+      utils.tasks.list.invalidate();
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
   if (tasksLoading || projectsLoading) {
     return (
@@ -108,7 +118,21 @@ export default function MemberDashboard() {
               {(tasks ?? []).filter(t => t.status !== 'DONE').slice(0, 5).map((task) => (
                 <div key={task.id} className="flex items-center justify-between p-4 rounded-xl border border-neutral-50 hover:border-[#5B0E14]/20 transition-all group">
                   <div className="flex items-center gap-4">
-                    <div className="w-2 h-2 rounded-full bg-blue-500" />
+                    <button 
+                      onClick={() => {
+                        const next = task.status === "TODO" ? "IN_PROGRESS" : task.status === "IN_PROGRESS" ? "DONE" : "TODO";
+                        updateStatusMutation.mutate({ id: task.id, status: next });
+                      }}
+                      className="shrink-0 group/btn"
+                    >
+                      {task.status === "DONE" ? (
+                        <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                      ) : task.status === "IN_PROGRESS" ? (
+                        <Clock className="w-5 h-5 text-blue-500" />
+                      ) : (
+                        <Circle className="w-5 h-5 text-neutral-300 group-hover/btn:text-[#5B0E14] transition-colors" />
+                      )}
+                    </button>
                     <div>
                       <p className="text-sm font-bold text-neutral-900 group-hover:text-[#5B0E14] transition-colors">{task.title}</p>
                       <p className="text-[10px] text-neutral-400 font-bold uppercase mt-0.5">

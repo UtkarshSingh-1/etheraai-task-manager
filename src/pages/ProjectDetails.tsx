@@ -85,6 +85,7 @@ export default function ProjectDetailsPage() {
       utils.tasks.listByProject.invalidate({ projectId });
       utils.projects.stats.invalidate({ projectId });
     },
+    onError: (err) => toast.error(err.message),
   });
 
   if (projectLoading || tasksLoading) {
@@ -256,7 +257,8 @@ export default function ProjectDetailsPage() {
                     const next = task.status === "TODO" ? "IN_PROGRESS" : task.status === "IN_PROGRESS" ? "DONE" : "TODO";
                     updateStatusMutation.mutate({ id: task.id, status: next });
                   }}
-                  className="shrink-0"
+                  disabled={!isAdmin && task.assignedTo !== user?.id}
+                  className={`shrink-0 ${(!isAdmin && task.assignedTo !== user?.id) ? "opacity-40 cursor-not-allowed" : ""}`}
                 >
                   {task.status === "DONE" ? (
                     <CheckCircle2 className="w-5 h-5 text-emerald-500" />

@@ -77,6 +77,7 @@ export default function TasksPage() {
     onSuccess: () => {
       utils.tasks.list.invalidate();
     },
+    onError: (err) => toast.error(err.message),
   });
 
   const handleCreate = (e: React.FormEvent) => {
@@ -241,7 +242,8 @@ export default function TasksPage() {
                   const next = task.status === "TODO" ? "IN_PROGRESS" : task.status === "IN_PROGRESS" ? "DONE" : "TODO";
                   handleStatusChange(task.id, next);
                 }}
-                className="shrink-0 group"
+                disabled={!isAdmin && task.assignedTo !== ctx.user?.id}
+                className={`shrink-0 group ${(!isAdmin && task.assignedTo !== ctx.user?.id) ? "opacity-40 cursor-not-allowed" : ""}`}
               >
                 {task.status === "DONE" ? (
                   <CheckCircle2 className="w-6 h-6 text-emerald-500" />
