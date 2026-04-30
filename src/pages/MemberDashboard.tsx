@@ -22,7 +22,7 @@ const cardVariants = {
 };
 
 export default function MemberDashboard() {
-  const { user } = useAuth();
+  const { user, isAdmin } = useAuth();
   const utils = trpc.useUtils();
   const { data: tasks, isLoading: tasksLoading } = trpc.tasks.list.useQuery();
   const { data: projects, isLoading: projectsLoading } = trpc.projects.list.useQuery();
@@ -123,7 +123,8 @@ export default function MemberDashboard() {
                         const next = task.status === "TODO" ? "IN_PROGRESS" : task.status === "IN_PROGRESS" ? "DONE" : "TODO";
                         updateStatusMutation.mutate({ id: task.id, status: next });
                       }}
-                      className="shrink-0 group/btn"
+                      disabled={!isAdmin && task.assignedTo !== user?.id}
+                      className={`shrink-0 group/btn ${(!isAdmin && task.assignedTo !== user?.id) ? "opacity-40 cursor-not-allowed" : ""}`}
                     >
                       {task.status === "DONE" ? (
                         <CheckCircle2 className="w-5 h-5 text-emerald-500" />
