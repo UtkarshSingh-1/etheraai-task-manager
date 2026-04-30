@@ -9,6 +9,8 @@ const transporter = nodemailer.createTransport({
     user: env.smtpUser,
     pass: env.smtpPass,
   },
+  // Force IPv4 to avoid ENETUNREACH issues on Railway
+  family: 4,
 });
 
 export async function sendEmail(to: string, subject: string, html: string) {
