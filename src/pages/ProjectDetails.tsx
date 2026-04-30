@@ -28,6 +28,8 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/useAuth";
 import { Edit2 } from "lucide-react";
 
@@ -163,8 +165,8 @@ export default function ProjectDetailsPage() {
                       assignedTo: assigneeId ? Number(assigneeId) : undefined
                     });
                   }} className="space-y-4 mt-2">
-                    <Input placeholder="Task title" value={title} onChange={e => setTitle(e.target.value)} />
-                    <Textarea placeholder="Description (optional)" value={description} onChange={e => setDescription(e.target.value)} />
+                    <Input placeholder="Task title" value={title} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)} />
+                    <Textarea placeholder="Description (optional)" value={description} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)} />
                     
                     <div className="space-y-2">
                       <label className="text-xs font-bold text-neutral-500 uppercase">Assign To</label>
@@ -208,12 +210,12 @@ export default function ProjectDetailsPage() {
                   <Input 
                     placeholder="Task title" 
                     value={editTask.title} 
-                    onChange={e => setEditTask({...editTask, title: e.target.value})} 
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditTask({...editTask, title: e.target.value})} 
                   />
                   <Textarea 
                     placeholder="Description" 
                     value={editTask.description || ""} 
-                    onChange={e => setEditTask({...editTask, description: e.target.value})} 
+                    onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setEditTask({...editTask, description: e.target.value})} 
                   />
                   
                   <div className="space-y-2">

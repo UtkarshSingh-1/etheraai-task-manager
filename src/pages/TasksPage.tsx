@@ -128,11 +128,11 @@ export default function TasksPage() {
               <form onSubmit={handleCreate} className="space-y-4 mt-2">
                 <div>
                   <label className="text-sm font-medium text-[#5B0E14] block mb-1.5">Title</label>
-                  <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Task title" />
+                  <Input value={title} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)} placeholder="Task title" />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-[#5B0E14] block mb-1.5">Description</label>
-                  <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Optional description" />
+                  <Textarea value={description} onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setDescription(e.target.value)} placeholder="Optional description" />
                 </div>
                 <div>
                   <label className="text-sm font-medium text-[#5B0E14] block mb-1.5">Project</label>
@@ -174,15 +174,15 @@ export default function TasksPage() {
                 assignedTo: editTask.assignedTo ? Number(editTask.assignedTo) : null
               });
             }} className="space-y-4 mt-2">
-              <Input 
-                placeholder="Task title" 
-                value={editTask.title} 
-                onChange={e => setEditTask({...editTask, title: e.target.value})} 
-              />
+                <Input 
+                  placeholder="Task title" 
+                  value={editTask.title} 
+                  onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditTask({...editTask, title: e.target.value})} 
+                />
               <Textarea 
                 placeholder="Description" 
                 value={editTask.description || ""} 
-                onChange={e => setEditTask({...editTask, description: e.target.value})} 
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setEditTask({...editTask, description: e.target.value})} 
               />
               <Button type="submit" className="w-full bg-[#5B0E14] text-[#F1E194]" disabled={updateMutation.isPending}>
                 Save Changes
