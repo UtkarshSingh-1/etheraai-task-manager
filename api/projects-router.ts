@@ -10,7 +10,7 @@ import {
   removeProjectMember,
   getProjectMembers,
 } from "./queries/projects";
-import { listTasksForProject } from "./queries/tasks";
+import { listTasksForProject, getProjectProgress } from "./queries/tasks";
 
 export const projectsRouter = createRouter({
   create: adminQuery
@@ -71,5 +71,11 @@ export const projectsRouter = createRouter({
     .input(z.object({ projectId: z.number() }))
     .query(async ({ input }) => {
       return getProjectMembers(input.projectId);
+    }),
+
+  stats: authedQuery
+    .input(z.object({ projectId: z.number() }))
+    .query(async ({ input }) => {
+      return getProjectProgress(input.projectId);
     }),
 });

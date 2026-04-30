@@ -60,96 +60,98 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-neutral-50 px-4">
+    <div className="min-h-screen flex items-center justify-center bg-[#FDFBF7] px-4 relative overflow-hidden">
+      <div className="absolute top-0 right-0 w-[50vw] h-[50vw] bg-[#5B0E14]/5 rounded-full -translate-y-1/2 translate-x-1/2 blur-3xl" />
+      <div className="absolute bottom-0 left-0 w-[40vw] h-[40vw] bg-[#5B0E14]/5 rounded-full translate-y-1/2 -translate-x-1/2 blur-3xl" />
+      
       <motion.div
         initial={{ opacity: 0, y: 20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.4 }}
-        className="w-full max-w-sm"
+        transition={{ duration: 0.6, ease: "easeOut" }}
+        className="w-full max-w-md z-10"
       >
-        <div className="bg-white rounded-2xl shadow-sm border border-neutral-200 p-8">
-          <div className="flex items-center gap-3 mb-6">
-            <div className="w-10 h-10 rounded-xl bg-neutral-900 flex items-center justify-center">
-              <Briefcase className="w-5 h-5 text-white" />
+        <div className="bg-white rounded-3xl shadow-2xl shadow-black/5 border border-neutral-100 p-10">
+          <div className="text-center mb-8">
+            <div className="w-14 h-14 rounded-2xl bg-[#5B0E14] flex items-center justify-center mx-auto mb-4 shadow-lg shadow-[#5B0E14]/20">
+              <Briefcase className="w-7 h-7 text-[#F1E194]" />
             </div>
-            <div>
-              <h1 className="text-lg font-semibold text-neutral-900">Welcome back</h1>
-              <p className="text-sm text-neutral-500">Sign in to your account</p>
-            </div>
+            <h1 className="text-2xl font-bold text-[#5B0E14] tracking-tight">Welcome back to Ethera</h1>
+            <p className="text-sm text-neutral-500 mt-1.5 font-medium">Elevate your team's productivity</p>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="email" className="text-sm font-medium text-neutral-700">Email</Label>
+          <form onSubmit={handleSubmit} className="space-y-5">
+            <div className="space-y-1.5">
+              <Label htmlFor="email" className="text-xs font-bold text-neutral-400 uppercase tracking-widest ml-1">Email Address</Label>
               <Input
                 id="email"
                 type="email"
                 placeholder="you@example.com"
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
-                className="mt-1.5"
+                className="h-12 px-4 rounded-xl border-neutral-200 focus:ring-[#5B0E14] focus:border-[#5B0E14] transition-all"
               />
             </div>
 
-            <div>
-              <Label htmlFor="password" className="text-sm font-medium text-neutral-700">Password</Label>
-              <div className="relative mt-1.5">
+            <div className="space-y-1.5">
+              <Label htmlFor="password" className="text-xs font-bold text-neutral-400 uppercase tracking-widest ml-1">Password</Label>
+              <div className="relative">
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
                   placeholder="Enter your password"
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
+                  className="h-12 px-4 rounded-xl border-neutral-200 focus:ring-[#5B0E14] focus:border-[#5B0E14] transition-all"
                 />
                 <button
                   type="button"
                   onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+                  className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-[#5B0E14] transition-colors"
                 >
                   {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
                 </button>
               </div>
             </div>
 
-            <div className="flex items-center justify-between">
-              <Link to="/forgot-password" className="text-xs text-neutral-600 hover:text-neutral-900 underline">
+            <div className="flex items-center justify-end">
+              <Link to="/forgot-password" className="text-xs font-bold text-[#5B0E14] hover:underline">
                 Forgot password?
               </Link>
             </div>
 
             <Button
               type="submit"
-              className="w-full bg-neutral-900 hover:bg-neutral-800"
+              className="w-full h-12 bg-[#5B0E14] hover:bg-[#4A0B10] text-[#F1E194] font-bold rounded-xl shadow-lg shadow-[#5B0E14]/10 transition-all active:scale-[0.98]"
               disabled={loginMutation.isPending}
             >
-              {loginMutation.isPending ? "Signing in..." : "Sign in"}
+              {loginMutation.isPending ? "AUTHENTICATING..." : "SIGN IN"}
             </Button>
           </form>
 
-          <div className="relative my-5">
+          <div className="relative my-8">
             <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-neutral-200" />
+              <div className="w-full border-t border-neutral-100" />
             </div>
-            <div className="relative flex justify-center text-xs">
-              <span className="bg-white px-3 text-neutral-400">or continue with</span>
+            <div className="relative flex justify-center text-[10px] font-bold uppercase tracking-widest">
+              <span className="bg-white px-4 text-neutral-400">or continue with</span>
             </div>
           </div>
 
           <Button
             variant="outline"
-            className="w-full"
+            className="w-full h-12 rounded-xl border-neutral-200 hover:bg-neutral-50 font-bold text-neutral-600 transition-all active:scale-[0.98]"
             onClick={() => {
               window.location.href = getOAuthUrl();
             }}
           >
-            <Chrome className="w-4 h-4 mr-2" />
-            Google
+            <Chrome className="w-4 h-4 mr-2 text-[#4285F4]" />
+            GOOGLE ACCOUNT
           </Button>
 
-          <p className="mt-5 text-center text-sm text-neutral-500">
-            Don't have an account?{" "}
-            <Link to="/signup" className="text-neutral-900 font-medium hover:underline">
-              Sign up
+          <p className="mt-8 text-center text-sm text-neutral-500 font-medium">
+            New to Ethera?{" "}
+            <Link to="/signup" className="text-[#5B0E14] font-bold hover:underline">
+              Create an account
             </Link>
           </p>
         </div>

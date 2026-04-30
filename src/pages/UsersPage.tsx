@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { trpc } from "@/providers/trpc";
 import { Spinner } from "@/components/ui/spinner";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Shield, Users } from "lucide-react";
+import { Shield, Users, Calendar } from "lucide-react";
 
 export default function UsersPage() {
   const { data: users, isLoading } = trpc.admin.users.useQuery();
@@ -16,61 +16,80 @@ export default function UsersPage() {
   }
 
   return (
-    <div className="p-8 max-w-6xl">
+    <div className="p-4 sm:p-8 max-w-6xl">
       <div className="mb-8">
-        <h1 className="text-2xl font-bold text-neutral-900">Users</h1>
-        <p className="text-sm text-neutral-500 mt-1">All registered users</p>
+        <h1 className="text-2xl font-bold text-[#5B0E14]">Team Members</h1>
+        <p className="text-sm text-neutral-500 mt-1">Manage and oversee all registered users in the platform</p>
       </div>
 
-      <div className="bg-white rounded-xl border border-neutral-200 overflow-hidden">
-        <div className="grid grid-cols-12 gap-4 px-5 py-3 bg-neutral-50 text-xs font-medium text-neutral-500 uppercase">
-          <div className="col-span-4">User</div>
-          <div className="col-span-3">Email</div>
+      <div className="bg-white rounded-3xl border border-neutral-200 shadow-sm overflow-hidden">
+        {/* Desktop Header */}
+        <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 bg-[#5B0E14]/5 text-[10px] font-black text-[#5B0E14] uppercase tracking-widest">
+          <div className="col-span-4">Member</div>
+          <div className="col-span-3">Email Address</div>
           <div className="col-span-2">Role</div>
-          <div className="col-span-2">Status</div>
-          <div className="col-span-1">Joined</div>
+          <div className="col-span-2 text-center">Status</div>
+          <div className="col-span-1 text-right">Joined</div>
         </div>
 
         <div className="divide-y divide-neutral-100">
           {(users ?? []).map((user, i) => (
             <motion.div
               key={user.id}
-              initial={{ opacity: 0 }}
-              animate={{ opacity: 1 }}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
               transition={{ delay: i * 0.03 }}
-              className="grid grid-cols-12 gap-4 px-5 py-3.5 items-center hover:bg-neutral-50 transition-colors"
+              className="md:grid md:grid-cols-12 gap-4 px-6 py-5 items-center hover:bg-neutral-50 transition-colors"
             >
-              <div className="col-span-4 flex items-center gap-3">
-                <Avatar className="w-8 h-8">
-                  <AvatarFallback className="bg-neutral-200 text-xs font-medium">
+              {/* Mobile Layout: Stacked */}
+              <div className="md:col-span-4 flex items-center gap-4 mb-4 md:mb-0">
+                <Avatar className="w-10 h-10 border-2 border-[#5B0E14]/10 shadow-sm">
+                  <AvatarFallback className="bg-[#5B0E14] text-[#F1E194] text-xs font-black">
                     {user.name?.charAt(0).toUpperCase() ?? "U"}
                   </AvatarFallback>
                 </Avatar>
-                <span className="text-sm font-medium text-neutral-900">{user.name}</span>
+                <div>
+                  <p className="text-sm font-bold text-[#5B0E14]">{user.name}</p>
+                  <p className="md:hidden text-[10px] text-neutral-400 font-medium">{user.email}</p>
+                </div>
               </div>
-              <div className="col-span-3 text-sm text-neutral-600">{user.email}</div>
-              <div className="col-span-2">
-                <span className={`inline-flex items-center gap-1 text-xs font-medium px-2 py-0.5 rounded-full ${user.role === "ADMIN" ? "bg-amber-50 text-amber-700" : "bg-neutral-100 text-neutral-600"}`}>
+
+              {/* Desktop Only Email */}
+              <div className="hidden md:col-span-3 text-sm text-neutral-600 font-medium truncate">
+                {user.email}
+              </div>
+
+              {/* Role */}
+              <div className="md:col-span-2 mb-3 md:mb-0">
+                <span className={`inline-flex items-center gap-1.5 text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-tighter ${user.role === "ADMIN" ? "bg-amber-50 text-amber-700 border border-amber-200" : "bg-neutral-100 text-neutral-600 border border-neutral-200"}`}>
                   {user.role === "ADMIN" && <Shield className="w-3 h-3" />}
                   {user.role}
                 </span>
               </div>
-              <div className="col-span-2">
-                <span className={`text-xs font-medium px-2 py-0.5 rounded-full ${user.isVerified ? "bg-emerald-50 text-emerald-600" : "bg-neutral-100 text-neutral-500"}`}>
-                  {user.isVerified ? "Verified" : "Unverified"}
+
+              {/* Status */}
+              <div className="md:col-span-2 mb-4 md:mb-0 md:text-center">
+                <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-tighter ${user.isVerified ? "bg-emerald-50 text-emerald-600 border border-emerald-200" : "bg-red-50 text-red-500 border border-red-200"}`}>
+                  {user.isVerified ? "Verified" : "Pending"}
                 </span>
               </div>
-              <div className="col-span-1 text-xs text-neutral-400">
-                {new Date(user.createdAt).toLocaleDateString()}
+
+              {/* Joined */}
+              <div className="md:col-span-1 text-[10px] font-bold text-neutral-400 md:text-right uppercase tracking-widest">
+                <div className="flex items-center gap-1 md:justify-end">
+                   <Calendar className="w-3 h-3 md:hidden" />
+                   {new Date(user.createdAt).toLocaleDateString(undefined, { month: 'short', year: 'numeric' })}
+                </div>
               </div>
             </motion.div>
           ))}
         </div>
 
         {(users ?? []).length === 0 && (
-          <div className="text-center py-12">
-            <Users className="w-10 h-10 text-neutral-300 mx-auto mb-2" />
-            <p className="text-sm text-neutral-400">No users found</p>
+          <div className="text-center py-20">
+            <Users className="w-16 h-16 text-neutral-100 mx-auto mb-4" />
+            <h3 className="text-[#5B0E14] font-bold">No Team Members Found</h3>
+            <p className="text-sm text-neutral-400">Members will appear here once they sign up.</p>
           </div>
         )}
       </div>

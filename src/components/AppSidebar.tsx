@@ -25,9 +25,11 @@ interface AppSidebarProps {
     role: string;
     avatar?: string | null;
   } | null;
+  onAction?: () => void;
+  isMobile?: boolean;
 }
 
-export function AppSidebar({ user }: AppSidebarProps) {
+export function AppSidebar({ user, onAction, isMobile }: AppSidebarProps) {
   const { logout } = useAuth();
   const location = useLocation();
   const [collapsed, setCollapsed] = useState(false);
@@ -42,53 +44,58 @@ export function AppSidebar({ user }: AppSidebarProps) {
     { label: "Settings", icon: Settings, href: "/settings" },
   ];
 
+  const actualCollapsed = isMobile ? false : collapsed;
+
   return (
     <motion.aside
-      animate={{ width: collapsed ? 72 : 260 }}
+      animate={{ width: actualCollapsed ? 72 : (isMobile ? "100%" : 260) }}
       transition={{ duration: 0.2, ease: "easeInOut" }}
-      className="flex flex-col border-r border-neutral-200 bg-white h-screen shrink-0"
+      className="flex flex-col border-r border-neutral-200 bg-[#5B0E14] h-screen shrink-0 text-[#F1E194]/80 shadow-2xl lg:shadow-none"
     >
-      <div className="flex items-center gap-3 h-16 px-4 border-b border-neutral-100">
-        <div className="w-8 h-8 rounded-lg bg-neutral-900 flex items-center justify-center shrink-0">
-          <Briefcase className="w-4 h-4 text-white" />
+      <div className="flex items-center gap-3 h-16 px-4 border-b border-white/10 shrink-0">
+        <div className="w-8 h-8 rounded-lg bg-[#F1E194] flex items-center justify-center shrink-0">
+          <Briefcase className="w-4 h-4 text-[#5B0E14]" />
         </div>
         <AnimatePresence>
-          {!collapsed && (
+          {!actualCollapsed && (
             <motion.span
               initial={{ opacity: 0 }}
               animate={{ opacity: 1 }}
               exit={{ opacity: 0 }}
-              className="font-semibold text-sm text-neutral-900 whitespace-nowrap"
+              className="font-bold text-sm text-[#F1E194] whitespace-nowrap tracking-wide"
             >
-              Task Manager
+              ETHERA AI
             </motion.span>
           )}
         </AnimatePresence>
-        <button
-          onClick={() => setCollapsed(!collapsed)}
-          className="ml-auto p-1 rounded-md hover:bg-neutral-100 transition-colors"
-        >
-          {collapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
-        </button>
+        {!isMobile && (
+          <button
+            onClick={() => setCollapsed(!collapsed)}
+            className="ml-auto p-1 rounded-md hover:bg-white/10 transition-colors text-[#F1E194]"
+          >
+            {actualCollapsed ? <ChevronRight className="w-4 h-4" /> : <ChevronLeft className="w-4 h-4" />}
+          </button>
+        )}
       </div>
 
-      <nav className="flex-1 py-4 px-3 space-y-1">
+      <nav className="flex-1 py-4 px-3 space-y-1 overflow-y-auto">
         {navItems.map((item) => {
           const isActive = location.pathname === item.href;
           return (
             <Link
               key={item.href}
               to={item.href}
+              onClick={onAction}
               className={cn(
-                "flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm font-medium transition-colors",
+                "flex items-center gap-3 px-3 py-3 rounded-xl text-sm font-bold transition-all duration-200",
                 isActive
-                  ? "bg-neutral-900 text-white"
-                  : "text-neutral-600 hover:bg-neutral-100 hover:text-neutral-900"
+                  ? "bg-[#F1E194] text-[#5B0E14] shadow-lg shadow-black/20"
+                  : "text-[#F1E194]/60 hover:bg-white/5 hover:text-[#F1E194]"
               )}
             >
-              <item.icon className="w-[18px] h-[18px] shrink-0" />
+              <item.icon className="w-5 h-5 shrink-0" />
               <AnimatePresence>
-                {!collapsed && (
+                {!actualCollapsed && (
                   <motion.span
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -104,33 +111,33 @@ export function AppSidebar({ user }: AppSidebarProps) {
         })}
       </nav>
 
-      <div className="border-t border-neutral-100 p-3">
-        <div className="flex items-center gap-3 px-3 py-2">
-          <Avatar className="w-8 h-8 shrink-0">
-            <AvatarFallback className="bg-neutral-200 text-xs font-medium">
+      <div className="border-t border-white/10 p-3 shrink-0 bg-[#5B0E14]">
+        <div className="flex items-center gap-3 px-3 py-3 bg-white/5 rounded-2xl">
+          <Avatar className="w-9 h-9 shrink-0 border border-[#F1E194]/20 shadow-sm">
+            <AvatarFallback className="bg-[#F1E194] text-[#5B0E14] text-xs font-black">
               {user?.name?.charAt(0).toUpperCase() ?? "U"}
             </AvatarFallback>
           </Avatar>
           <AnimatePresence>
-            {!collapsed && (
+            {!actualCollapsed && (
               <motion.div
                 initial={{ opacity: 0 }}
                 animate={{ opacity: 1 }}
                 exit={{ opacity: 0 }}
                 className="flex-1 min-w-0"
               >
-                <p className="text-sm font-medium text-neutral-900 truncate">{user?.name}</p>
-                <div className="flex items-center gap-1.5">
-                  <p className="text-xs text-neutral-500 truncate">{user?.email}</p>
-                  {isAdmin && <Shield className="w-3 h-3 text-amber-500 shrink-0" />}
+                <p className="text-sm font-bold text-[#F1E194] truncate">{user?.name}</p>
+                <div className="flex items-center gap-1.5 mt-0.5">
+                  <p className="text-[10px] text-[#F1E194]/40 truncate font-medium uppercase tracking-wider">{user?.role}</p>
+                  {isAdmin && <Shield className="w-3 h-3 text-[#F1E194] shrink-0 opacity-50" />}
                 </div>
               </motion.div>
             )}
           </AnimatePresence>
-          {!collapsed && (
+          {!actualCollapsed && (
             <button
               onClick={logout}
-              className="p-1.5 rounded-md hover:bg-red-50 text-neutral-400 hover:text-red-500 transition-colors"
+              className="p-2 rounded-xl hover:bg-white/10 text-[#F1E194]/40 hover:text-[#F1E194] transition-colors"
               title="Logout"
             >
               <LogOut className="w-4 h-4" />

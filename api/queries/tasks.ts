@@ -110,3 +110,33 @@ export async function getTaskStats() {
     overdueTasks: overdueTasks[0]?.count ?? 0,
   };
 }
+
+export async function getTeamProgress() {
+  const db = getDb();
+  return db
+    .select({
+      userId: schema.users.id,
+      userName: schema.users.name,
+      totalTasks: sql<number>`count(${schema.tasks.id})`,
+      completedTasks: sql<number>`sum(case when ${schema.tasks.status} = 'DONE' then 1 else 0 end)`,
+    })
+    .from(schema.users)
+    .leftJoin(schema.tasks, eq(schema.users.id, schema.tasks.assignedTo))
+    .groupBy(schema.users.id, schema.users.name)
+    .orderBy(sql`completedTasks desc`);
+}
+
+export async function getProjectProgress(projectId: number) {
+  const db = getDb();
+  const res = await db
+    .select({
+      total: sql<number>`count(*)`,
+      completed: sql<number>`sum(case when status = 'DONE' then 1 else 0 end)`,
+      inProgress: sql<number>`sum(case when status = 'IN_PROGRESS' then 1 else 0 end)`,
+      todo: sql<number>`sum(case when status = 'TODO' then 1 else 0 end)`,
+    })
+    .from(schema.tasks)
+    .where(eq(schema.tasks.projectId, projectId));
+  
+  return res[0] || { total: 0, completed: 0, inProgress: 0, todo: 0 };
+}

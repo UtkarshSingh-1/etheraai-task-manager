@@ -7,8 +7,9 @@ import { Dialog, DialogContent, DialogHeader, DialogTitle, DialogTrigger } from 
 import { Textarea } from "@/components/ui/textarea";
 import { Spinner } from "@/components/ui/spinner";
 import { useAuth } from "@/hooks/useAuth";
-import { Plus, FolderKanban, Trash2 } from "lucide-react";
+import { Plus, FolderKanban, Trash2, ArrowUpRight } from "lucide-react";
 import { toast } from "sonner";
+import { Link } from "react-router";
 
 export default function ProjectsPage() {
   const { isAdmin } = useAuth();
@@ -56,16 +57,16 @@ export default function ProjectsPage() {
   }
 
   return (
-    <div className="p-8 max-w-6xl">
+    <div className="p-4 sm:p-8 max-w-6xl">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900">Projects</h1>
-          <p className="text-sm text-neutral-500 mt-1">Manage your team projects</p>
+          <h1 className="text-2xl font-bold text-[#5B0E14]">Projects</h1>
+          <p className="text-sm text-neutral-500 mt-1">Manage and track your team projects</p>
         </div>
         {isAdmin && (
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-neutral-900 hover:bg-neutral-800">
+              <Button className="bg-[#5B0E14] hover:bg-[#4A0B10] text-[#F1E194]">
                 <Plus className="w-4 h-4 mr-1.5" />
                 New Project
               </Button>
@@ -76,14 +77,14 @@ export default function ProjectsPage() {
               </DialogHeader>
               <form onSubmit={handleCreate} className="space-y-4 mt-2">
                 <div>
-                  <label className="text-sm font-medium text-neutral-700 block mb-1.5">Name</label>
+                  <label className="text-sm font-medium text-[#5B0E14] block mb-1.5">Name</label>
                   <Input value={name} onChange={(e) => setName(e.target.value)} placeholder="Project name" />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-neutral-700 block mb-1.5">Description</label>
+                  <label className="text-sm font-medium text-[#5B0E14] block mb-1.5">Description</label>
                   <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Optional description" />
                 </div>
-                <Button type="submit" className="w-full bg-neutral-900 hover:bg-neutral-800" disabled={createMutation.isPending}>
+                <Button type="submit" className="w-full bg-[#5B0E14] text-[#F1E194]" disabled={createMutation.isPending}>
                   {createMutation.isPending ? "Creating..." : "Create Project"}
                 </Button>
               </form>
@@ -92,7 +93,7 @@ export default function ProjectsPage() {
         )}
       </div>
 
-      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
         <AnimatePresence>
           {(projects ?? []).map((project, i) => (
             <motion.div
@@ -101,11 +102,17 @@ export default function ProjectsPage() {
               animate={{ opacity: 1, y: 0 }}
               exit={{ opacity: 0, scale: 0.95 }}
               transition={{ delay: i * 0.05 }}
-              className="bg-white rounded-xl border border-neutral-200 p-5 hover:shadow-md transition-shadow"
+              className="group bg-white rounded-2xl border border-neutral-200 p-6 hover:shadow-xl hover:border-[#5B0E14]/30 transition-all duration-300 relative overflow-hidden"
             >
-              <div className="flex items-start justify-between mb-3">
-                <div className="p-2 rounded-lg bg-neutral-50">
-                  <FolderKanban className="w-5 h-5 text-neutral-700" />
+              <div className="absolute top-0 right-0 p-4 opacity-0 group-hover:opacity-100 transition-opacity">
+                <Link to={`/projects/${project.id}`}>
+                  <ArrowUpRight className="w-5 h-5 text-[#5B0E14]" />
+                </Link>
+              </div>
+
+              <div className="flex items-start justify-between mb-4">
+                <div className="p-3 rounded-xl bg-[#5B0E14]/5 text-[#5B0E14]">
+                  <FolderKanban className="w-6 h-6" />
                 </div>
                 {isAdmin && (
                   <button
@@ -114,18 +121,27 @@ export default function ProjectsPage() {
                         deleteMutation.mutate({ id: project.id });
                       }
                     }}
-                    className="p-1.5 rounded-md hover:bg-red-50 text-neutral-400 hover:text-red-500 transition-colors"
+                    className="p-1.5 rounded-md hover:bg-red-50 text-neutral-300 hover:text-red-500 transition-colors"
                   >
                     <Trash2 className="w-4 h-4" />
                   </button>
                 )}
               </div>
-              <h3 className="text-sm font-semibold text-neutral-900 mb-1">{project.name}</h3>
-              <p className="text-xs text-neutral-500 mb-3 line-clamp-2">
-                {project.description ?? "No description"}
-              </p>
-              <div className="flex items-center justify-between text-xs text-neutral-400">
-                <span>{new Date(project.createdAt).toLocaleDateString()}</span>
+
+              <Link to={`/projects/${project.id}`} className="block group-hover:translate-x-1 transition-transform duration-300">
+                <h3 className="text-lg font-bold text-[#5B0E14] mb-2">{project.name}</h3>
+                <p className="text-sm text-neutral-500 mb-6 line-clamp-2 leading-relaxed">
+                  {project.description ?? "No description available."}
+                </p>
+              </Link>
+
+              <div className="flex items-center justify-between pt-4 border-t border-neutral-50">
+                <span className="text-[10px] font-bold text-neutral-400 uppercase tracking-widest">
+                  {new Date(project.createdAt).toLocaleDateString()}
+                </span>
+                <Link to={`/projects/${project.id}`} className="text-xs font-bold text-[#5B0E14] opacity-0 group-hover:opacity-100 transition-opacity">
+                  VIEW DETAILS
+                </Link>
               </div>
             </motion.div>
           ))}
@@ -133,12 +149,12 @@ export default function ProjectsPage() {
       </div>
 
       {(projects ?? []).length === 0 && (
-        <div className="text-center py-16">
-          <FolderKanban className="w-12 h-12 text-neutral-300 mx-auto mb-3" />
-          <p className="text-neutral-500">No projects yet</p>
-          {isAdmin && (
-            <p className="text-sm text-neutral-400 mt-1">Create your first project to get started</p>
-          )}
+        <div className="text-center py-20 bg-neutral-50 rounded-3xl border border-dashed border-neutral-200">
+          <FolderKanban className="w-16 h-16 text-neutral-200 mx-auto mb-4" />
+          <h3 className="text-lg font-bold text-[#5B0E14]">No Projects Yet</h3>
+          <p className="text-neutral-400 max-w-xs mx-auto mt-2">
+            Projects are containers for tasks and team collaboration. Create one to get started!
+          </p>
         </div>
       )}
     </div>

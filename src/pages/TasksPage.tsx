@@ -92,18 +92,18 @@ export default function TasksPage() {
   }
 
   return (
-    <div className="p-8 max-w-6xl">
+    <div className="p-4 sm:p-8 max-w-6xl">
       <div className="flex items-center justify-between mb-8">
         <div>
-          <h1 className="text-2xl font-bold text-neutral-900">Tasks</h1>
+          <h1 className="text-2xl font-bold text-[#5B0E14]">Tasks</h1>
           <p className="text-sm text-neutral-500 mt-1">
-            {isAdmin ? "Manage all tasks" : "Your assigned tasks"}
+            {isAdmin ? "Oversee all team activities" : "Focus on your assigned work"}
           </p>
         </div>
         {isAdmin && (
           <Dialog open={dialogOpen} onOpenChange={setDialogOpen}>
             <DialogTrigger asChild>
-              <Button className="bg-neutral-900 hover:bg-neutral-800">
+              <Button className="bg-[#5B0E14] hover:bg-[#4A0B10] text-[#F1E194]">
                 <Plus className="w-4 h-4 mr-1.5" />
                 New Task
               </Button>
@@ -114,15 +114,15 @@ export default function TasksPage() {
               </DialogHeader>
               <form onSubmit={handleCreate} className="space-y-4 mt-2">
                 <div>
-                  <label className="text-sm font-medium text-neutral-700 block mb-1.5">Title</label>
+                  <label className="text-sm font-medium text-[#5B0E14] block mb-1.5">Title</label>
                   <Input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Task title" />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-neutral-700 block mb-1.5">Description</label>
+                  <label className="text-sm font-medium text-[#5B0E14] block mb-1.5">Description</label>
                   <Textarea value={description} onChange={(e) => setDescription(e.target.value)} placeholder="Optional description" />
                 </div>
                 <div>
-                  <label className="text-sm font-medium text-neutral-700 block mb-1.5">Project</label>
+                  <label className="text-sm font-medium text-[#5B0E14] block mb-1.5">Project</label>
                   <Select value={projectId} onValueChange={setProjectId}>
                     <SelectTrigger>
                       <SelectValue placeholder="Select a project" />
@@ -136,7 +136,7 @@ export default function TasksPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <Button type="submit" className="w-full bg-neutral-900 hover:bg-neutral-800" disabled={createMutation.isPending}>
+                <Button type="submit" className="w-full bg-[#5B0E14] text-[#F1E194]" disabled={createMutation.isPending}>
                   {createMutation.isPending ? "Creating..." : "Create Task"}
                 </Button>
               </form>
@@ -145,47 +145,42 @@ export default function TasksPage() {
         )}
       </div>
 
-      <div className="space-y-2">
+      <div className="space-y-3">
         <AnimatePresence>
           {(tasks ?? []).map((task, i) => (
             <motion.div
               key={task.id}
-              initial={{ opacity: 0, y: 8 }}
-              animate={{ opacity: 1, y: 0 }}
-              exit={{ opacity: 0 }}
+              initial={{ opacity: 0, x: -10 }}
+              animate={{ opacity: 1, x: 0 }}
+              exit={{ opacity: 0, scale: 0.95 }}
               transition={{ delay: i * 0.03 }}
-              className="bg-white rounded-xl border border-neutral-200 p-4 flex items-center gap-4"
+              className="bg-white rounded-2xl border border-neutral-200 p-5 flex items-center gap-5 hover:border-[#5B0E14]/30 hover:shadow-md transition-all duration-200"
             >
               <button
                 onClick={() => {
                   const next = task.status === "TODO" ? "IN_PROGRESS" : task.status === "IN_PROGRESS" ? "DONE" : "TODO";
                   handleStatusChange(task.id, next);
                 }}
-                className="shrink-0"
+                className="shrink-0 group"
               >
                 {task.status === "DONE" ? (
-                  <CheckCircle2 className="w-5 h-5 text-emerald-500" />
+                  <CheckCircle2 className="w-6 h-6 text-emerald-500" />
                 ) : task.status === "IN_PROGRESS" ? (
-                  <Clock className="w-5 h-5 text-blue-500" />
+                  <Clock className="w-6 h-6 text-blue-500 animate-pulse" />
                 ) : (
-                  <Circle className="w-5 h-5 text-neutral-300" />
+                  <Circle className="w-6 h-6 text-neutral-300 group-hover:text-[#5B0E14] transition-colors" />
                 )}
               </button>
 
               <div className="flex-1 min-w-0">
-                <p className={`text-sm font-medium truncate ${task.status === "DONE" ? "line-through text-neutral-400" : "text-neutral-900"}`}>
+                <p className={`text-base font-bold truncate ${task.status === "DONE" ? "line-through text-neutral-400" : "text-[#5B0E14]"}`}>
                   {task.title}
                 </p>
-                <p className="text-xs text-neutral-500 truncate">{task.description ?? "No description"}</p>
+                <p className="text-xs text-neutral-500 truncate mt-0.5">{task.description ?? "No description"}</p>
               </div>
 
-              <div className="flex items-center gap-3 shrink-0">
+              <div className="flex items-center gap-4 shrink-0">
                 <StatusBadge status={task.status} />
-                {task.dueDate && (
-                  <span className={`text-xs ${new Date(task.dueDate) < new Date() && task.status !== "DONE" ? "text-red-500" : "text-neutral-400"}`}>
-                    {new Date(task.dueDate).toLocaleDateString()}
-                  </span>
-                )}
                 {isAdmin && (
                   <button
                     onClick={() => {
@@ -193,9 +188,9 @@ export default function TasksPage() {
                         deleteMutation.mutate({ id: task.id });
                       }
                     }}
-                    className="p-1.5 rounded-md hover:bg-red-50 text-neutral-400 hover:text-red-500 transition-colors"
+                    className="p-2 rounded-lg hover:bg-red-50 text-neutral-300 hover:text-red-500 transition-colors"
                   >
-                    <Trash2 className="w-3.5 h-3.5" />
+                    <Trash2 className="w-4 h-4" />
                   </button>
                 )}
               </div>
@@ -205,9 +200,12 @@ export default function TasksPage() {
       </div>
 
       {(tasks ?? []).length === 0 && (
-        <div className="text-center py-16">
-          <CheckCircle2 className="w-12 h-12 text-neutral-300 mx-auto mb-3" />
-          <p className="text-neutral-500">No tasks found</p>
+        <div className="text-center py-20 bg-neutral-50 rounded-3xl border border-dashed border-neutral-200">
+          <CheckCircle2 className="w-16 h-16 text-neutral-200 mx-auto mb-4" />
+          <h3 className="text-lg font-bold text-[#5B0E14]">No Tasks Found</h3>
+          <p className="text-neutral-400 max-w-xs mx-auto mt-2">
+            Assignments will appear here once created. Stay productive!
+          </p>
         </div>
       )}
     </div>
@@ -221,7 +219,7 @@ function StatusBadge({ status }: { status: string }) {
     DONE: "bg-emerald-50 text-emerald-600",
   };
   return (
-    <span className={`text-[11px] font-medium px-2 py-0.5 rounded-full ${styles[status] ?? ""}`}>
+    <span className={`text-[10px] font-bold px-2 py-0.5 rounded uppercase tracking-widest ${styles[status] ?? ""}`}>
       {status.replace("_", " ")}
     </span>
   );

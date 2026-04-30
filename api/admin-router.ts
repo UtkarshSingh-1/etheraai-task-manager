@@ -1,5 +1,5 @@
 import { createRouter, adminQuery } from "./middleware";
-import { getTaskStats } from "./queries/tasks";
+import { getTaskStats, getTeamProgress } from "./queries/tasks";
 import { getUserStats, listAllUsers } from "./queries/users";
 import { getProjectStats } from "./queries/projects";
 
@@ -17,5 +17,9 @@ export const adminRouter = createRouter({
 
   users: adminQuery.query(async () => {
     return listAllUsers();
+  }),
+  
+  teamProgress: adminQuery.query(async () => {
+    return getTeamProgress();
   }),
 });
