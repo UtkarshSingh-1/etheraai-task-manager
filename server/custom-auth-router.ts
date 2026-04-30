@@ -89,6 +89,38 @@ export const customAuthRouter = createRouter({
       return { success: true, message: "Account created successfully!" };
     }),
 
+  directRegister: publicQuery
+    .input(
+      z.object({
+        name: z.string().min(1, "Name is required").max(100),
+        email: z.string().email("Invalid email address"),
+        password: z.string().min(6, "Password must be at least 6 characters"),
+        role: z.enum(["MEMBER", "ADMIN"]),
+      })
+    )
+    .mutation(async ({ input }: { input: any }) => {
+      // Check if email already taken
+      const existing = await findUserByEmail(input.email);
+      if (existing) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Email already registered. Please sign in instead.",
+        });
+      }
+
+      // Create user immediately — verified by default
+      const hashedPassword = await bcrypt.hash(input.password, 12);
+      await createUser({
+        name: input.name,
+        email: input.email,
+        password: hashedPassword,
+        role: input.role,
+        isVerified: true,
+      });
+
+      return { success: true, message: "Account created successfully!" };
+    }),
+
   login: publicQuery
     .input(
       z.object({
