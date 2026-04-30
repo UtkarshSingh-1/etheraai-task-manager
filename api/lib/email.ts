@@ -3,8 +3,8 @@ import { env } from "./env";
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 465,
-  secure: true, // SSL
+  port: 587,
+  secure: false, // Use STARTTLS
   auth: {
     user: env.smtpUser,
     pass: env.smtpPass,
@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
   family: 4,
   connectionTimeout: 15000,
   greetingTimeout: 15000,
-} as any);
+});
 
 export async function sendEmail(to: string, subject: string, html: string) {
   if (!env.smtpUser || !env.smtpPass) {
@@ -21,7 +21,7 @@ export async function sendEmail(to: string, subject: string, html: string) {
   }
 
   const start = Date.now();
-  console.log(`[email] Starting to send email to ${to}...`);
+  console.log(`[email] Sending to ${to} (Config: ${env.smtpUser ? 'OK' : 'MISSING'})...`);
 
   // We don't await this inside the mutation anymore for instant UI
   transporter.sendMail({
