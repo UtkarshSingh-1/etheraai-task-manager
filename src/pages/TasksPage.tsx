@@ -35,6 +35,7 @@ export default function TasksPage() {
   const utils = trpc.useUtils();
   const { data: tasks, isLoading } = trpc.tasks.list.useQuery();
   const { data: projects } = trpc.projects.list.useQuery();
+  const { data: users } = trpc.admin.users.useQuery(undefined, { enabled: isAdmin });
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
@@ -149,6 +150,21 @@ export default function TasksPage() {
                     </SelectContent>
                   </Select>
                 </div>
+                <div>
+                  <label className="text-sm font-medium text-[#5B0E14] block mb-1.5">Assign To</label>
+                  <Select value={assigneeId} onValueChange={setAssigneeId}>
+                    <SelectTrigger>
+                      <SelectValue placeholder="Select a team member" />
+                    </SelectTrigger>
+                    <SelectContent>
+                      {(users ?? []).map((u) => (
+                        <SelectItem key={u.id} value={String(u.id)}>
+                          {u.name}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                </div>
                 <Button type="submit" className="w-full bg-[#5B0E14] text-[#F1E194]" disabled={createMutation.isPending}>
                   {createMutation.isPending ? "Creating..." : "Create Task"}
                 </Button>
@@ -184,6 +200,23 @@ export default function TasksPage() {
                 value={editTask.description || ""} 
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setEditTask({...editTask, description: e.target.value})} 
               />
+              <div>
+                <label className="text-sm font-medium text-[#5B0E14] block mb-1.5">Reassign To</label>
+                <Select 
+                  value={editTask.assignedTo?.toString()} 
+                  onValueChange={(val) => setEditTask({...editTask, assignedTo: val === "null" ? null : Number(val)})}
+                >
+                  <SelectTrigger>
+                    <SelectValue placeholder="Select team member" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="null">Unassigned</SelectItem>
+                    {(users ?? []).map((u) => (
+                      <SelectItem key={u.id} value={u.id.toString()}>{u.name}</SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
+              </div>
               <Button type="submit" className="w-full bg-[#5B0E14] text-[#F1E194]" disabled={updateMutation.isPending}>
                 Save Changes
               </Button>
