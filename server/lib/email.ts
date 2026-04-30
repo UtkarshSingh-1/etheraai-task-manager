@@ -3,15 +3,15 @@ import { env } from "./env";
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 465,
-  secure: true, // Use Direct SSL
+  port: 587,
+  secure: false, // Use STARTTLS
   auth: {
     user: env.smtpUser,
     pass: env.smtpPass,
   },
   family: 4,
-  connectionTimeout: 15000,
-  greetingTimeout: 15000,
+  connectionTimeout: 20000,
+  greetingTimeout: 20000,
 } as any);
 
 export async function sendEmail(to: string, subject: string, html: string) {
