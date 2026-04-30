@@ -21,9 +21,15 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@/components/ui/dialog";
-import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
 import { useAuth } from "@/hooks/useAuth";
+import { Edit2 } from "lucide-react";
 
 export default function ProjectDetailsPage() {
   const { id } = useParams();
@@ -38,7 +44,9 @@ export default function ProjectDetailsPage() {
 
   const [title, setTitle] = useState("");
   const [description, setDescription] = useState("");
+  const [assigneeId, setAssigneeId] = useState<string | undefined>(undefined);
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [editTask, setEditTask] = useState<any>(null);
 
   const createMutation = trpc.tasks.create.useMutation({
     onSuccess: () => {
@@ -57,6 +65,15 @@ export default function ProjectDetailsPage() {
       toast.success("Task deleted");
       utils.tasks.listByProject.invalidate({ projectId });
       utils.projects.stats.invalidate({ projectId });
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const updateMutation = trpc.tasks.update.useMutation({
+    onSuccess: () => {
+      toast.success("Task updated");
+      utils.tasks.listByProject.invalidate({ projectId });
+      setEditTask(null);
     },
     onError: (err) => toast.error(err.message),
   });
@@ -139,10 +156,30 @@ export default function ProjectDetailsPage() {
                   <form onSubmit={(e) => {
                     e.preventDefault();
                     if (!title.trim()) return;
-                    createMutation.mutate({ title, description, projectId });
+                    createMutation.mutate({ 
+                      title, 
+                      description, 
+                      projectId,
+                      assignedTo: assigneeId ? Number(assigneeId) : undefined
+                    });
                   }} className="space-y-4 mt-2">
                     <Input placeholder="Task title" value={title} onChange={e => setTitle(e.target.value)} />
                     <Textarea placeholder="Description (optional)" value={description} onChange={e => setDescription(e.target.value)} />
+                    
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-neutral-500 uppercase">Assign To</label>
+                      <Select value={assigneeId} onValueChange={setAssigneeId}>
+                        <SelectTrigger>
+                          <SelectValue placeholder="Select team member" />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {(members ?? []).map((m) => (
+                            <SelectItem key={m.id} value={m.id.toString()}>{m.name}</SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
+                    </div>
+
                     <Button type="submit" className="w-full bg-[#5B0E14] text-[#F1E194]" disabled={createMutation.isPending}>
                       Create Task
                     </Button>
@@ -151,6 +188,59 @@ export default function ProjectDetailsPage() {
               </Dialog>
             )}
           </div>
+
+          {/* Edit Task Dialog */}
+          <Dialog open={!!editTask} onOpenChange={(open) => !open && setEditTask(null)}>
+            <DialogContent>
+              <DialogHeader>
+                <DialogTitle>Edit Task</DialogTitle>
+              </DialogHeader>
+              {editTask && (
+                <form onSubmit={(e) => {
+                  e.preventDefault();
+                  updateMutation.mutate({
+                    id: editTask.id,
+                    title: editTask.title,
+                    description: editTask.description,
+                    assignedTo: editTask.assignedTo ? Number(editTask.assignedTo) : null
+                  });
+                }} className="space-y-4 mt-2">
+                  <Input 
+                    placeholder="Task title" 
+                    value={editTask.title} 
+                    onChange={e => setEditTask({...editTask, title: e.target.value})} 
+                  />
+                  <Textarea 
+                    placeholder="Description" 
+                    value={editTask.description || ""} 
+                    onChange={e => setEditTask({...editTask, description: e.target.value})} 
+                  />
+                  
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-neutral-500 uppercase">Reassign To</label>
+                    <Select 
+                      value={editTask.assignedTo?.toString()} 
+                      onValueChange={(val) => setEditTask({...editTask, assignedTo: Number(val)})}
+                    >
+                      <SelectTrigger>
+                        <SelectValue placeholder="Select team member" />
+                      </SelectTrigger>
+                      <SelectContent>
+                        <SelectItem value="null">Unassigned</SelectItem>
+                        {(members ?? []).map((m) => (
+                          <SelectItem key={m.id} value={m.id.toString()}>{m.name}</SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  </div>
+
+                  <Button type="submit" className="w-full bg-[#5B0E14] text-[#F1E194]" disabled={updateMutation.isPending}>
+                    Save Changes
+                  </Button>
+                </form>
+              )}
+            </DialogContent>
+          </Dialog>
 
           <div className="space-y-3">
             {(tasks ?? []).map((task) => (
@@ -178,18 +268,36 @@ export default function ProjectDetailsPage() {
                   <p className={`text-sm font-semibold truncate ${task.status === "DONE" ? "line-through text-neutral-400" : "text-neutral-900"}`}>
                     {task.title}
                   </p>
-                  <p className="text-xs text-neutral-500 truncate">{task.description ?? "No description"}</p>
+                  <div className="flex items-center gap-2 mt-0.5">
+                    <p className="text-xs text-neutral-500 truncate">{task.description ?? "No description"}</p>
+                    {task.assigneeName && (
+                      <>
+                        <span className="text-neutral-300">•</span>
+                        <p className="text-[10px] font-bold text-[#5B0E14] uppercase tracking-tighter bg-[#F1E194]/30 px-1.5 rounded">
+                          {task.assigneeName}
+                        </p>
+                      </>
+                    )}
+                  </div>
                 </div>
                 <StatusBadge status={task.status} />
                 {isAdmin && (
-                  <button 
-                    onClick={() => {
-                      if(confirm("Delete task?")) deleteMutation.mutate({ id: task.id });
-                    }}
-                    className="p-2 rounded-lg hover:bg-red-50 text-neutral-300 hover:text-red-500 transition-colors"
-                  >
-                    <Trash2 className="w-4 h-4" />
-                  </button>
+                  <div className="flex items-center gap-1">
+                    <button 
+                      onClick={() => setEditTask(task)}
+                      className="p-2 rounded-lg hover:bg-neutral-100 text-neutral-300 hover:text-neutral-600 transition-colors"
+                    >
+                      <Edit2 className="w-4 h-4" />
+                    </button>
+                    <button 
+                      onClick={() => {
+                        if(confirm("Delete task?")) deleteMutation.mutate({ id: task.id });
+                      }}
+                      className="p-2 rounded-lg hover:bg-red-50 text-neutral-300 hover:text-red-500 transition-colors"
+                    >
+                      <Trash2 className="w-4 h-4" />
+                    </button>
+                  </div>
                 )}
               </motion.div>
             ))}

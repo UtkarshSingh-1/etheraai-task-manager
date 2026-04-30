@@ -9,6 +9,7 @@ import {
   updateTaskStatus,
   assignTask,
   deleteTask,
+  updateTask,
 } from "./queries/tasks";
 
 export const tasksRouter = createRouter({
@@ -69,6 +70,24 @@ export const tasksRouter = createRouter({
     .input(z.object({ id: z.number(), userId: z.number().nullable() }))
     .mutation(async ({ input }) => {
       await assignTask(input.id, input.userId);
+      return { success: true };
+    }),
+
+  update: adminQuery
+    .input(
+      z.object({
+        id: z.number(),
+        title: z.string().min(1).max(255).optional(),
+        description: z.string().optional(),
+        assignedTo: z.number().nullable().optional(),
+      })
+    )
+    .mutation(async ({ input }) => {
+      await updateTask(input.id, {
+        title: input.title,
+        description: input.description,
+        assignedTo: input.assignedTo,
+      });
       return { success: true };
     }),
 

@@ -36,8 +36,19 @@ export async function findTaskById(id: number) {
 
 export async function listTasksForProject(projectId: number) {
   return getDb()
-    .select()
+    .select({
+      id: schema.tasks.id,
+      title: schema.tasks.title,
+      description: schema.tasks.description,
+      status: schema.tasks.status,
+      assignedTo: schema.tasks.assignedTo,
+      projectId: schema.tasks.projectId,
+      dueDate: schema.tasks.dueDate,
+      createdAt: schema.tasks.createdAt,
+      assigneeName: schema.users.name,
+    })
     .from(schema.tasks)
+    .leftJoin(schema.users, eq(schema.tasks.assignedTo, schema.users.id))
     .where(eq(schema.tasks.projectId, projectId))
     .orderBy(schema.tasks.createdAt);
 }
@@ -52,8 +63,19 @@ export async function listTasksForUser(userId: number) {
 
 export async function listAllTasks() {
   return getDb()
-    .select()
+    .select({
+      id: schema.tasks.id,
+      title: schema.tasks.title,
+      description: schema.tasks.description,
+      status: schema.tasks.status,
+      assignedTo: schema.tasks.assignedTo,
+      projectId: schema.tasks.projectId,
+      dueDate: schema.tasks.dueDate,
+      createdAt: schema.tasks.createdAt,
+      assigneeName: schema.users.name,
+    })
     .from(schema.tasks)
+    .leftJoin(schema.users, eq(schema.tasks.assignedTo, schema.users.id))
     .orderBy(schema.tasks.createdAt);
 }
 
@@ -68,6 +90,17 @@ export async function assignTask(id: number, userId: number | null) {
   await getDb()
     .update(schema.tasks)
     .set({ assignedTo: userId })
+    .where(eq(schema.tasks.id, id));
+}
+
+export async function updateTask(id: number, data: {
+  title?: string;
+  description?: string;
+  assignedTo?: number | null;
+}) {
+  await getDb()
+    .update(schema.tasks)
+    .set(data)
     .where(eq(schema.tasks.id, id));
 }
 
