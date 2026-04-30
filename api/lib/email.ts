@@ -11,6 +11,10 @@ const transporter = nodemailer.createTransport({
   },
   // Force IPv4 to avoid ENETUNREACH issues on Railway
   family: 4,
+  // Optimization: Keep connection open
+  pool: true,
+  maxConnections: 5,
+  maxMessages: 100,
 });
 
 export async function sendEmail(to: string, subject: string, html: string) {
@@ -19,11 +23,19 @@ export async function sendEmail(to: string, subject: string, html: string) {
     return;
   }
 
-  await transporter.sendMail({
+  const start = Date.now();
+  console.log(`[email] Starting to send email to ${to}...`);
+
+  // We don't await this inside the mutation anymore for instant UI
+  transporter.sendMail({
     from: `"Ethera Team" <${env.smtpUser}>`,
     to,
     subject,
     html,
+  }).then(() => {
+    console.log(`[email] Successfully sent to ${to} in ${Date.now() - start}ms`);
+  }).catch((err) => {
+    console.error(`[email] Failed to send to ${to} after ${Date.now() - start}ms:`, err);
   });
 }
 
