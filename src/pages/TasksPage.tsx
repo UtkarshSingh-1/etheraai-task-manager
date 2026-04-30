@@ -31,7 +31,7 @@ import {
 import { toast } from "sonner";
 
 export default function TasksPage() {
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
   const utils = trpc.useUtils();
   const { data: tasks, isLoading } = trpc.tasks.list.useQuery();
   const { data: projects } = trpc.projects.list.useQuery();
@@ -242,8 +242,8 @@ export default function TasksPage() {
                   const next = task.status === "TODO" ? "IN_PROGRESS" : task.status === "IN_PROGRESS" ? "DONE" : "TODO";
                   handleStatusChange(task.id, next);
                 }}
-                disabled={!isAdmin && task.assignedTo !== ctx.user?.id}
-                className={`shrink-0 group ${(!isAdmin && task.assignedTo !== ctx.user?.id) ? "opacity-40 cursor-not-allowed" : ""}`}
+                disabled={!isAdmin && task.assignedTo !== user?.id}
+                className={`shrink-0 group ${(!isAdmin && task.assignedTo !== user?.id) ? "opacity-40 cursor-not-allowed" : ""}`}
               >
                 {task.status === "DONE" ? (
                   <CheckCircle2 className="w-6 h-6 text-emerald-500" />

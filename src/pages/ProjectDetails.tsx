@@ -36,7 +36,7 @@ import { Edit2 } from "lucide-react";
 export default function ProjectDetailsPage() {
   const { id } = useParams();
   const projectId = Number(id);
-  const { isAdmin } = useAuth();
+  const { isAdmin, user } = useAuth();
   const utils = trpc.useUtils();
 
   const { data: project, isLoading: projectLoading } = trpc.projects.getById.useQuery({ id: projectId });
