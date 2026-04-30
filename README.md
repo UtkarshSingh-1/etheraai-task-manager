@@ -71,6 +71,27 @@ This project is a sophisticated Task Management application built as an assignme
   npm start
   ```
 
+## 🔐 Demo Accounts
+
+To test the application without creating a new account, you can use the following pre-seeded credentials:
+
+### Admin Account
+- **Email**: `admin@ethera.com`
+- **Password**: `EtheraAdmin@2026`
+- **Permissions**: Full access to all dashboards, user performance tracking, and project management.
+
+### Member Account
+- **Email**: `arjun.sharma@ethera.com`
+- **Password**: `EtheraUser@2026`
+- **Permissions**: Access to assigned projects and personal task tracking.
+
+*Other available member accounts (using the same password):*
+- `priya.patel@ethera.com`
+- `rohan.gupta@ethera.com`
+- `ananya.singh@ethera.com`
+
+---
+
 ## 📂 Project Structure
 
 - `src/`: React frontend components, pages, and hooks.
