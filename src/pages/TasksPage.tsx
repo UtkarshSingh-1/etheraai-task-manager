@@ -141,7 +141,7 @@ export default function TasksPage() {
                     <SelectTrigger>
                       <SelectValue placeholder="Select a project" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent position="popper" className="max-h-96">
                       {(projects ?? []).map((p) => (
                         <SelectItem key={p.id} value={String(p.id)}>
                           {p.name}
@@ -156,7 +156,7 @@ export default function TasksPage() {
                     <SelectTrigger>
                       <SelectValue placeholder="Select a team member" />
                     </SelectTrigger>
-                    <SelectContent>
+                    <SelectContent position="popper" className="max-h-96">
                       {(users ?? []).map((u) => (
                         <SelectItem key={u.id} value={String(u.id)}>
                           {u.name}
@@ -209,7 +209,7 @@ export default function TasksPage() {
                   <SelectTrigger>
                     <SelectValue placeholder="Select team member" />
                   </SelectTrigger>
-                  <SelectContent>
+                  <SelectContent position="popper" className="max-h-96">
                     <SelectItem value="null">Unassigned</SelectItem>
                     {(users ?? []).map((u) => (
                       <SelectItem key={u.id} value={u.id.toString()}>{u.name}</SelectItem>

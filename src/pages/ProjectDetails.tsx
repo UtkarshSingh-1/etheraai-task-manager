@@ -174,7 +174,7 @@ export default function ProjectDetailsPage() {
                         <SelectTrigger>
                           <SelectValue placeholder="Select team member" />
                         </SelectTrigger>
-                        <SelectContent>
+                        <SelectContent position="popper" className="max-h-96">
                           {(members ?? []).map((m) => (
                             <SelectItem key={m.id} value={m.id.toString()}>{m.name}</SelectItem>
                           ))}
@@ -222,12 +222,12 @@ export default function ProjectDetailsPage() {
                     <label className="text-xs font-bold text-neutral-500 uppercase">Reassign To</label>
                     <Select 
                       value={editTask.assignedTo?.toString()} 
-                      onValueChange={(val) => setEditTask({...editTask, assignedTo: Number(val)})}
+                      onValueChange={(val) => setEditTask({...editTask, assignedTo: val === "null" ? null : Number(val)})}
                     >
                       <SelectTrigger>
                         <SelectValue placeholder="Select team member" />
                       </SelectTrigger>
-                      <SelectContent>
+                      <SelectContent position="popper" className="max-h-96">
                         <SelectItem value="null">Unassigned</SelectItem>
                         {(members ?? []).map((m) => (
                           <SelectItem key={m.id} value={m.id.toString()}>{m.name}</SelectItem>
