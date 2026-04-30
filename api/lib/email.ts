@@ -4,19 +4,19 @@ import { env } from "./env";
 const transporter = nodemailer.createTransport({
   service: "gmail",
   auth: {
-    user: env.emailUser,
-    pass: env.emailPass,
+    user: env.smtpUser,
+    pass: env.smtpPass,
   },
 });
 
 export async function sendEmail(to: string, subject: string, html: string) {
-  if (!env.emailUser || !env.emailPass) {
-    console.warn("[email] Email credentials not configured");
+  if (!env.smtpUser || !env.smtpPass) {
+    console.warn("[email] SMTP credentials not configured");
     return;
   }
 
   await transporter.sendMail({
-    from: `"Team Task Manager" <${env.emailUser}>`,
+    from: `"Ethera Team" <${env.smtpUser}>`,
     to,
     subject,
     html,

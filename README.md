@@ -41,7 +41,17 @@ This project is a sophisticated AI-powered Task Management application built as 
    ```
 
 3. Set up environment variables:
-   Create a `.env` file based on `.env.example`.
+   Create a `.env` file based on `.env.example`. 
+   
+   **Google OAuth Setup**:
+   - Go to [Google Cloud Console](https://console.cloud.google.com/).
+   - Create a project and set up OAuth credentials.
+   - **Authorized JavaScript Origin**: `http://localhost:3000`
+   - **Authorized Redirect URI**: `http://localhost:3000/api/oauth/callback`
+   - Copy `Client ID` and `Client Secret` to your `.env`.
+
+   **SMTP Setup**:
+   - Use your Gmail address and a [Google App Password](https://myaccount.google.com/apppasswords) for `SMTP_USER` and `SMTP_PASS`.
 
 4. Run database migrations:
    ```bash

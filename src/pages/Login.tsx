@@ -9,17 +9,18 @@ import { Briefcase, Eye, EyeOff, Chrome } from "lucide-react";
 import { toast } from "sonner";
 
 function getOAuthUrl() {
-  const authBase = import.meta.env.VITE_KIMI_AUTH_URL || "https://auth.kimi.com";
-  const appID = import.meta.env.VITE_APP_ID;
+  const clientID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
   const redirectUri = `${window.location.origin}/api/oauth/callback`;
-  const state = btoa(redirectUri);
-
-  const url = new URL(`${authBase}/api/oauth/authorize`);
-  url.searchParams.set("client_id", appID);
+  const scope = "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email";
+  
+  const url = new URL("https://accounts.google.com/o/oauth2/v2/auth");
+  url.searchParams.set("client_id", clientID);
   url.searchParams.set("redirect_uri", redirectUri);
   url.searchParams.set("response_type", "code");
-  url.searchParams.set("scope", "profile");
-  url.searchParams.set("state", state);
+  url.searchParams.set("scope", scope);
+  url.searchParams.set("access_type", "offline");
+  url.searchParams.set("prompt", "consent");
+  url.searchParams.set("state", btoa(redirectUri));
 
   return url.toString();
 }
