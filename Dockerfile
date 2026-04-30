@@ -7,6 +7,8 @@ RUN --mount=type=cache,id=s/1ee2aee2-3c9c-48c6-b80f-0541ddefad7a-root-npm,target
     npm ci --prefer-offline --no-audit
 
 FROM deps AS build
+ARG VITE_GOOGLE_CLIENT_ID
+ENV VITE_GOOGLE_CLIENT_ID=$VITE_GOOGLE_CLIENT_ID
 COPY . .
 RUN npm run build
 
