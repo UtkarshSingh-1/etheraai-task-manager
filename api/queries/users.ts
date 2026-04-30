@@ -115,3 +115,14 @@ export async function getUserStats() {
     adminCount: adminCount[0]?.count ?? 0,
   };
 }
+
+export async function updateUser(id: number, data: {
+  name?: string;
+  email?: string;
+  role?: "MEMBER" | "ADMIN";
+}) {
+  await getDb()
+    .update(schema.users)
+    .set(data)
+    .where(eq(schema.users.id, id));
+}

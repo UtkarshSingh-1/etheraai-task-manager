@@ -2,7 +2,7 @@ import { motion } from "framer-motion";
 import { trpc } from "@/providers/trpc";
 import { Spinner } from "@/components/ui/spinner";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Shield, Users, Calendar, UserPlus } from "lucide-react";
+import { Shield, Users, Calendar, UserPlus, Edit2 } from "lucide-react";
 import { 
   Dialog, 
   DialogContent, 
@@ -31,6 +31,7 @@ export default function UsersPage() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [role, setRole] = useState<"MEMBER" | "ADMIN">("MEMBER");
+  const [editUser, setEditUser] = useState<any>(null);
 
   const createMutation = trpc.admin.createUser.useMutation({
     onSuccess: () => {
@@ -41,6 +42,15 @@ export default function UsersPage() {
       setEmail("");
       setPassword("");
       setRole("MEMBER");
+    },
+    onError: (err) => toast.error(err.message),
+  });
+
+  const updateMutation = trpc.admin.updateUser.useMutation({
+    onSuccess: () => {
+      toast.success("User updated successfully");
+      utils.admin.users.invalidate();
+      setEditUser(null);
     },
     onError: (err) => toast.error(err.message),
   });
@@ -109,6 +119,50 @@ export default function UsersPage() {
         </Dialog>
       </div>
 
+      {/* Edit User Dialog */}
+      <Dialog open={!!editUser} onOpenChange={(open) => !open && setEditUser(null)}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle className="text-[#5B0E14] font-black uppercase tracking-tight">Edit Member</DialogTitle>
+          </DialogHeader>
+          {editUser && (
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              updateMutation.mutate({
+                id: editUser.id,
+                name: editUser.name,
+                email: editUser.email,
+                role: editUser.role
+              });
+            }} className="space-y-4 pt-4">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-[#5B0E14] uppercase tracking-widest">Full Name</label>
+                <Input value={editUser.name} onChange={e => setEditUser({...editUser, name: e.target.value})} placeholder="Full Name" className="bg-neutral-50 border-neutral-200" />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-[#5B0E14] uppercase tracking-widest">Email Address</label>
+                <Input type="email" value={editUser.email} onChange={e => setEditUser({...editUser, email: e.target.value})} placeholder="Email" className="bg-neutral-50 border-neutral-200" />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-[#5B0E14] uppercase tracking-widest">System Role</label>
+                <Select value={editUser.role} onValueChange={(val: any) => setEditUser({...editUser, role: val})}>
+                  <SelectTrigger className="bg-neutral-50 border-neutral-200">
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent position="popper">
+                    <SelectItem value="MEMBER">Member</SelectItem>
+                    <SelectItem value="ADMIN">Administrator</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button type="submit" className="w-full bg-[#5B0E14] text-[#F1E194] mt-4 py-6 text-sm font-black uppercase tracking-widest" disabled={updateMutation.isPending}>
+                {updateMutation.isPending ? "Updating..." : "Save Changes"}
+              </Button>
+            </form>
+          )}
+        </DialogContent>
+      </Dialog>
+
       <div className="bg-white rounded-3xl border border-neutral-200 shadow-sm overflow-hidden">
         {/* Desktop Header */}
         <div className="hidden md:grid grid-cols-12 gap-4 px-6 py-4 bg-[#5B0E14]/5 text-[10px] font-black text-[#5B0E14] uppercase tracking-widest">
@@ -159,6 +213,16 @@ export default function UsersPage() {
                 <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg uppercase tracking-tighter ${user.isVerified ? "bg-emerald-50 text-emerald-600 border border-emerald-200" : "bg-red-50 text-red-500 border border-red-200"}`}>
                   {user.isVerified ? "Verified" : "Pending"}
                 </span>
+              </div>
+
+              {/* Actions */}
+              <div className="md:col-span-1 flex items-center md:justify-end gap-2 mb-4 md:mb-0">
+                <button 
+                  onClick={() => setEditUser(user)}
+                  className="p-2 rounded-lg hover:bg-neutral-100 text-neutral-300 hover:text-neutral-600 transition-colors"
+                >
+                  <Edit2 className="w-4 h-4" />
+                </button>
               </div>
 
               {/* Joined */}

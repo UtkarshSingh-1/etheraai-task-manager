@@ -1,6 +1,6 @@
 import { createRouter, adminQuery } from "./middleware";
 import { getTaskStats, getTeamProgress } from "./queries/tasks";
-import { getUserStats, listAllUsers, createUser } from "./queries/users";
+import { getUserStats, listAllUsers, createUser, updateUser } from "./queries/users";
 import { getProjectStats } from "./queries/projects";
 import bcrypt from "bcryptjs";
 import { z } from "zod";
@@ -40,6 +40,22 @@ export const adminRouter = createRouter({
         password: hashedPassword,
         role: input.role,
         isVerified: true, // Admin-created users are verified by default
+      });
+      return { success: true };
+    }),
+
+  updateUser: adminQuery
+    .input(z.object({
+      id: z.number(),
+      name: z.string().min(2).optional(),
+      email: z.string().email().optional(),
+      role: z.enum(["MEMBER", "ADMIN"]).optional(),
+    }))
+    .mutation(async ({ input }) => {
+      await updateUser(input.id, {
+        name: input.name,
+        email: input.email,
+        role: input.role,
       });
       return { success: true };
     }),
