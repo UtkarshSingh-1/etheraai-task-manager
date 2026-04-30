@@ -5,7 +5,8 @@ import { trpc } from "@/providers/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Briefcase, Eye, EyeOff, Chrome } from "lucide-react";
+import { Briefcase, Eye, EyeOff, Chrome, ArrowLeft } from "lucide-react";
+import { toast } from "sonner";
 
 function getOAuthUrl() {
   const clientID = import.meta.env.VITE_GOOGLE_CLIENT_ID;
@@ -23,26 +24,37 @@ function getOAuthUrl() {
 
   return url.toString();
 }
-import { toast } from "sonner";
 
 export default function Signup() {
   const navigate = useNavigate();
+  const [step, setStep] = useState<"info" | "otp">("info");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [otp, setOtp] = useState("");
   const [showPassword, setShowPassword] = useState(false);
 
-  const registerMutation = trpc.customAuth.register.useMutation({
+  const requestOtpMutation = trpc.customAuth.requestSignupOtp.useMutation({
     onSuccess: () => {
-      toast.success("Account created! Please verify your email.");
-      navigate("/verify", { state: { email } });
+      toast.success("Verification code sent to your email!");
+      setStep("otp");
     },
     onError: (err) => {
       toast.error(err.message);
     },
   });
 
-  const handleSubmit = (e: React.FormEvent) => {
+  const registerMutation = trpc.customAuth.register.useMutation({
+    onSuccess: () => {
+      toast.success("Account created successfully!");
+      navigate("/login");
+    },
+    onError: (err) => {
+      toast.error(err.message);
+    },
+  });
+
+  const handleRequestOtp = (e: React.FormEvent) => {
     e.preventDefault();
     if (!name || !email || !password) {
       toast.error("Please fill in all fields");
@@ -52,7 +64,16 @@ export default function Signup() {
       toast.error("Password must be at least 6 characters");
       return;
     }
-    registerMutation.mutate({ name, email, password });
+    requestOtpMutation.mutate({ email });
+  };
+
+  const handleRegister = (e: React.FormEvent) => {
+    e.preventDefault();
+    if (!otp || otp.length !== 6) {
+      toast.error("Please enter a valid 6-digit code");
+      return;
+    }
+    registerMutation.mutate({ name, email, password, otp });
   };
 
   return (
@@ -69,83 +90,124 @@ export default function Signup() {
               <Briefcase className="w-5 h-5 text-white" />
             </div>
             <div>
-              <h1 className="text-lg font-semibold text-neutral-900">Create account</h1>
-              <p className="text-sm text-neutral-500">Start managing your tasks</p>
+              <h1 className="text-lg font-semibold text-neutral-900">
+                {step === "info" ? "Create account" : "Verify email"}
+              </h1>
+              <p className="text-sm text-neutral-500">
+                {step === "info" ? "Start managing your tasks" : `Code sent to ${email}`}
+              </p>
             </div>
           </div>
 
-          <form onSubmit={handleSubmit} className="space-y-4">
-            <div>
-              <Label htmlFor="name" className="text-sm font-medium text-neutral-700">Full Name</Label>
-              <Input
-                id="name"
-                type="text"
-                placeholder="John Doe"
-                value={name}
-                onChange={(e) => setName(e.target.value)}
-                className="mt-1.5"
-              />
-            </div>
+          {step === "info" ? (
+            <>
+              <form onSubmit={handleRequestOtp} className="space-y-4">
+                <div>
+                  <Label htmlFor="name" className="text-sm font-medium text-neutral-700">Full Name</Label>
+                  <Input
+                    id="name"
+                    type="text"
+                    placeholder="John Doe"
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                    className="mt-1.5"
+                  />
+                </div>
 
-            <div>
-              <Label htmlFor="email" className="text-sm font-medium text-neutral-700">Email</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder="you@example.com"
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="mt-1.5"
-              />
-            </div>
+                <div>
+                  <Label htmlFor="email" className="text-sm font-medium text-neutral-700">Email</Label>
+                  <Input
+                    id="email"
+                    type="email"
+                    placeholder="you@example.com"
+                    value={email}
+                    onChange={(e) => setEmail(e.target.value)}
+                    className="mt-1.5"
+                  />
+                </div>
 
-            <div>
-              <Label htmlFor="password" className="text-sm font-medium text-neutral-700">Password</Label>
-              <div className="relative mt-1.5">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder="Min. 6 characters"
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                />
-                <button
-                  type="button"
-                  onClick={() => setShowPassword(!showPassword)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+                <div>
+                  <Label htmlFor="password" className="text-sm font-medium text-neutral-700">Password</Label>
+                  <div className="relative mt-1.5">
+                    <Input
+                      id="password"
+                      type={showPassword ? "text" : "password"}
+                      placeholder="Min. 6 characters"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
+                    />
+                    <button
+                      type="button"
+                      onClick={() => setShowPassword(!showPassword)}
+                      className="absolute right-3 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-neutral-600"
+                    >
+                      {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                <Button
+                  type="submit"
+                  className="w-full bg-neutral-900 hover:bg-neutral-800"
+                  disabled={requestOtpMutation.isPending}
                 >
-                  {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
-                </button>
+                  {requestOtpMutation.isPending ? "Sending code..." : "Continue"}
+                </Button>
+              </form>
+
+              <div className="relative my-5">
+                <div className="absolute inset-0 flex items-center">
+                  <div className="w-full border-t border-neutral-200" />
+                </div>
+                <div className="relative flex justify-center text-xs">
+                  <span className="bg-white px-3 text-neutral-400">or continue with</span>
+                </div>
               </div>
-            </div>
-            <Button
-              type="submit"
-              className="w-full bg-neutral-900 hover:bg-neutral-800"
-              disabled={registerMutation.isPending}
-            >
-              {registerMutation.isPending ? "Creating account..." : "Create account"}
-            </Button>
-          </form>
 
-          <div className="relative my-5">
-            <div className="absolute inset-0 flex items-center">
-              <div className="w-full border-t border-neutral-200" />
-            </div>
-            <div className="relative flex justify-center text-xs">
-              <span className="bg-white px-3 text-neutral-400">or continue with</span>
-            </div>
-          </div>
+              <Button
+                variant="outline"
+                className="w-full"
+                onClick={() => {
+                  window.location.href = getOAuthUrl();
+                }}
+              >
+                <Chrome className="w-4 h-4 mr-2" />
+                Google
+              </Button>
+            </>
+          ) : (
+            <form onSubmit={handleRegister} className="space-y-4">
+              <div>
+                <Label htmlFor="otp" className="text-sm font-medium text-neutral-700">Verification Code</Label>
+                <Input
+                  id="otp"
+                  type="text"
+                  maxLength={6}
+                  placeholder="000000"
+                  value={otp}
+                  onChange={(e) => setOtp(e.target.value.replace(/\D/g, ""))}
+                  className="mt-1.5 text-center text-2xl tracking-[0.5em] font-mono"
+                />
+              </div>
 
-          <Button
-            variant="outline"
-            className="w-full"
-            onClick={() => {
-              window.location.href = getOAuthUrl();
-            }}
-          >
-            <Chrome className="w-4 h-4 mr-2" />
-            Google
-          </Button>
+              <Button
+                type="submit"
+                className="w-full bg-neutral-900 hover:bg-neutral-800"
+                disabled={registerMutation.isPending}
+              >
+                {registerMutation.isPending ? "Verifying..." : "Verify & Create Account"}
+              </Button>
+
+              <button
+                type="button"
+                onClick={() => setStep("info")}
+                className="w-full flex items-center justify-center gap-2 text-sm text-neutral-500 hover:text-neutral-900"
+              >
+                <ArrowLeft className="w-4 h-4" />
+                Back to information
+              </button>
+            </form>
+          )}
 
           <p className="mt-5 text-center text-sm text-neutral-500">
             Already have an account?{" "}

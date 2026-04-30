@@ -58,6 +58,7 @@ export async function createUser(data: {
   email: string;
   password: string;
   role?: "MEMBER" | "ADMIN";
+  isVerified?: boolean;
 }) {
   const result = await getDb()
     .insert(schema.users)
@@ -66,7 +67,7 @@ export async function createUser(data: {
       email: data.email,
       password: data.password,
       role: data.role ?? "MEMBER",
-      isVerified: false,
+      isVerified: data.isVerified ?? false,
       lastSignInAt: new Date(),
     });
   return result;

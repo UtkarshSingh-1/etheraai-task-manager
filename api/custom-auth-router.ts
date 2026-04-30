@@ -17,14 +17,8 @@ import { Session } from "@contracts/constants";
 import * as cookie from "cookie";
 
 export const customAuthRouter = createRouter({
-  register: publicQuery
-    .input(
-      z.object({
-        name: z.string().min(1, "Name is required").max(100),
-        email: z.string().email("Invalid email address"),
-        password: z.string().min(6, "Password must be at least 6 characters"),
-      })
-    )
+  requestSignupOtp: publicQuery
+    .input(z.object({ email: z.string().email() }))
     .mutation(async ({ input }) => {
       const existing = await findUserByEmail(input.email);
       if (existing) {
@@ -33,13 +27,6 @@ export const customAuthRouter = createRouter({
           message: "Email already registered. Please sign in instead.",
         });
       }
-
-      const hashedPassword = await bcrypt.hash(input.password, 12);
-      await createUser({
-        name: input.name,
-        email: input.email,
-        password: hashedPassword,
-      });
 
       const otpCode = generateOtp();
       await createOtp({ email: input.email, code: otpCode, type: "VERIFY" });
@@ -54,7 +41,50 @@ export const customAuthRouter = createRouter({
         console.error("[email] Failed to send verification email:", e);
       }
 
-      return { success: true, message: "Account created. Please verify your email." };
+      return { success: true, message: "Verification code sent to your email." };
+    }),
+
+  register: publicQuery
+    .input(
+      z.object({
+        name: z.string().min(1, "Name is required").max(100),
+        email: z.string().email("Invalid email address"),
+        password: z.string().min(6, "Password must be at least 6 characters"),
+        otp: z.string().length(6, "OTP must be 6 digits"),
+      })
+    )
+    .mutation(async ({ input }) => {
+      // 1. Verify OTP
+      const otp = await findValidOtp(input.email, input.otp, "VERIFY");
+      if (!otp) {
+        throw new TRPCError({
+          code: "BAD_REQUEST",
+          message: "Invalid or expired verification code",
+        });
+      }
+
+      // 2. Check if email was taken while waiting
+      const existing = await findUserByEmail(input.email);
+      if (existing) {
+        throw new TRPCError({
+          code: "CONFLICT",
+          message: "Email already registered",
+        });
+      }
+
+      // 3. Create user (mark as verified immediately)
+      const hashedPassword = await bcrypt.hash(input.password, 12);
+      await createUser({
+        name: input.name,
+        email: input.email,
+        password: hashedPassword,
+        isVerified: true,
+      });
+
+      // 4. Cleanup OTP
+      await deleteOtp(otp.id);
+
+      return { success: true, message: "Account created successfully!" };
     }),
 
   login: publicQuery
