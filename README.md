@@ -1,6 +1,6 @@
 # Ethera AI Task Manager
 
-This project is a sophisticated AI-powered Task Management application built as an assignment for **Ethera.ai**. It features a modern tech stack with a robust backend and a highly responsive frontend.
+This project is a sophisticated Task Management application built as an assignment for **Ethera.ai**. It features a modern tech stack with a robust backend and a highly responsive frontend.
 
 ## 🚀 Tech Stack
 
