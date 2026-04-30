@@ -12,7 +12,7 @@ const transporter = nodemailer.createTransport({
   family: 4,
   connectionTimeout: 15000,
   greetingTimeout: 15000,
-});
+} as any);
 
 export async function sendEmail(to: string, subject: string, html: string) {
   if (!env.smtpUser || !env.smtpPass) {
