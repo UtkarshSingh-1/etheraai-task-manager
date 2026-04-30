@@ -123,8 +123,8 @@ export default function MemberDashboard() {
                         const next = task.status === "TODO" ? "IN_PROGRESS" : task.status === "IN_PROGRESS" ? "DONE" : "TODO";
                         updateStatusMutation.mutate({ id: task.id, status: next });
                       }}
-                      disabled={!isAdmin && task.assignedTo !== user?.id}
-                      className={`shrink-0 group/btn ${(!isAdmin && task.assignedTo !== user?.id) ? "opacity-40 cursor-not-allowed" : ""}`}
+                      disabled={!isAdmin && Number(task.assignedTo) !== Number(user?.id)}
+                      className={`shrink-0 group/btn ${(!isAdmin && Number(task.assignedTo) !== Number(user?.id)) ? "opacity-40 cursor-not-allowed" : ""}`}
                     >
                       {task.status === "DONE" ? (
                         <CheckCircle2 className="w-5 h-5 text-emerald-500" />

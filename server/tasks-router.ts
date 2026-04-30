@@ -1,4 +1,5 @@
 import { z } from "zod";
+import { TRPCError } from "@trpc/server";
 import { createRouter, authedQuery, adminQuery } from "./middleware";
 import {
   createTask,
@@ -57,11 +58,23 @@ export const tasksRouter = createRouter({
     .mutation(async ({ input, ctx }) => {
       const task = await findTaskById(input.id);
       if (!task) {
-        return { success: false, message: "Task not found" };
+        throw new TRPCError({
+          code: "NOT_FOUND",
+          message: "Task not found",
+        });
       }
-      if (ctx.user.role !== "ADMIN" && task.assignedTo !== ctx.user.id) {
-        return { success: false, message: "Not authorized" };
+
+      // Authorization: Admin or the user assigned to the task
+      const isAssigned = task.assignedTo !== null && Number(task.assignedTo) === Number(ctx.user.id);
+      const isAdmin = ctx.user.role === "ADMIN";
+
+      if (!isAdmin && !isAssigned) {
+        throw new TRPCError({
+          code: "FORBIDDEN",
+          message: "You can only update tasks assigned to you",
+        });
       }
+
       await updateTaskStatus(input.id, input.status);
       return { success: true };
     }),
