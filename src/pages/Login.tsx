@@ -30,7 +30,6 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
-  const utils = trpc.useUtils();
 
   // If already logged in, redirect away
   const { isAuthenticated, isAdmin, isLoading: authLoading } = trpc.customAuth.me.useQuery(undefined, {
@@ -42,12 +41,13 @@ export default function Login() {
   const loginMutation = trpc.customAuth.login.useMutation({
     onSuccess: async (data) => {
       toast.success("Login successful");
-      // Invalidate so AppLayout sees the authenticated user immediately
-      await utils.customAuth.me.invalidate();
+      // Hard redirect so the page fully reloads with the new session cookie.
+      // This avoids a race where the React Query cache still has null from
+      // before login and the AppLayout redirects back to /login.
       if (data.user.role === "ADMIN") {
-        navigate("/admin/dashboard", { replace: true });
+        window.location.href = "/admin/dashboard";
       } else {
-        navigate("/dashboard", { replace: true });
+        window.location.href = "/dashboard";
       }
     },
     onError: (err) => {
