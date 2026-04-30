@@ -1,5 +1,5 @@
 import { useState } from "react";
-import { Link, useNavigate } from "react-router";
+import { Link, useNavigate, Navigate } from "react-router";
 import { motion } from "framer-motion";
 import { trpc } from "@/providers/trpc";
 import { Button } from "@/components/ui/button";
@@ -30,14 +30,24 @@ export default function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const utils = trpc.useUtils();
+
+  // If already logged in, redirect away
+  const { isAuthenticated, isAdmin, isLoading: authLoading } = trpc.customAuth.me.useQuery(undefined, {
+    staleTime: 0,
+    retry: false,
+    select: (u: any) => ({ isAuthenticated: !!u, isAdmin: u?.role === "ADMIN" }),
+  }) as any;
 
   const loginMutation = trpc.customAuth.login.useMutation({
-    onSuccess: (data) => {
+    onSuccess: async (data) => {
       toast.success("Login successful");
+      // Invalidate so AppLayout sees the authenticated user immediately
+      await utils.customAuth.me.invalidate();
       if (data.user.role === "ADMIN") {
-        navigate("/admin/dashboard");
+        navigate("/admin/dashboard", { replace: true });
       } else {
-        navigate("/dashboard");
+        navigate("/dashboard", { replace: true });
       }
     },
     onError: (err) => {
@@ -58,6 +68,11 @@ export default function Login() {
     }
     loginMutation.mutate({ email, password });
   };
+
+  // Redirect already-authenticated users
+  if (!authLoading && isAuthenticated) {
+    return <Navigate to={isAdmin ? "/admin/dashboard" : "/dashboard"} replace />;
+  }
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-[#FDFBF7] px-4 relative overflow-hidden">
