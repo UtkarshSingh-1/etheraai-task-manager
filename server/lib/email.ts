@@ -10,7 +10,6 @@ const transporter = nodemailer.createTransport({
     pass: env.smtpPass,
   },
   family: 4,
-  localAddress: "0.0.0.0", // Force local IPv4 to avoid ENETUNREACH on IPv6
   connectionTimeout: 15000,
   greetingTimeout: 15000,
 } as any);
