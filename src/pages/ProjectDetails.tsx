@@ -184,6 +184,8 @@ export default function ProjectDetailsPage() {
                           ))}
                         </SelectContent>
                       </Select>
+                    </div>
+
                     <div className="space-y-2">
                       <label className="text-xs font-bold text-neutral-500 uppercase">Deadline</label>
                       <Input 
