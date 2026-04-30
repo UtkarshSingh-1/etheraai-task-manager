@@ -2,19 +2,18 @@ import nodemailer from "nodemailer";
 import { env } from "./env";
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.gmail.com",
+  host: "smtp.googlemail.com", // Alternative endpoint
   port: 587,
-  secure: false, // Use STARTTLS
+  secure: false, 
   auth: {
     user: env.smtpUser,
     pass: env.smtpPass,
   },
-  // Force IPv4 to avoid ENETUNREACH issues on Railway
+  // Aggressive IPv4 force
   family: 4,
-  // Optimization: Keep connection open
-  pool: true,
-  maxConnections: 5,
-  maxMessages: 100,
+  connectionTimeout: 10000, // 10 seconds
+  greetingTimeout: 10000,
+  socketTimeout: 15000,
 } as any);
 
 export async function sendEmail(to: string, subject: string, html: string) {
