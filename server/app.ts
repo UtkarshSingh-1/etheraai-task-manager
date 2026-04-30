@@ -1,8 +1,8 @@
 import { Hono } from "hono";
 import { fetchRequestHandler } from "@trpc/server/adapters/fetch";
-import { appRouter } from "./router";
-import { createContext } from "./context";
-import { createGoogleOAuthCallbackHandler } from "./lib/google-auth";
+import { appRouter } from "./router.js";
+import { createContext } from "./context.js";
+import { createGoogleOAuthCallbackHandler } from "./lib/google-auth.js";
 
 const app = new Hono();
 

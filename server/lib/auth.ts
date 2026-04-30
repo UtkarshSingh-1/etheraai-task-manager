@@ -1,8 +1,8 @@
 import * as cookie from "cookie";
 import { Session } from "@contracts/constants";
 import { Errors } from "@contracts/errors";
-import { verifySessionToken } from "./session";
-import { findUserByUnionId } from "../queries/users";
+import { verifySessionToken } from "./session.js";
+import { findUserByUnionId } from "../queries/users.js";
 
 export async function authenticateRequest(headers: Headers) {
   const cookieHeader = headers.get("cookie") || "";

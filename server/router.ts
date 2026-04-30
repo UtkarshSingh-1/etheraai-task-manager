@@ -1,9 +1,9 @@
-import { authRouter } from "./auth-router";
-import { customAuthRouter } from "./custom-auth-router";
-import { projectsRouter } from "./projects-router";
-import { tasksRouter } from "./tasks-router";
-import { adminRouter } from "./admin-router";
-import { createRouter, publicQuery } from "./middleware";
+import { authRouter } from "./auth-router.js";
+import { customAuthRouter } from "./custom-auth-router.js";
+import { projectsRouter } from "./projects-router.js";
+import { tasksRouter } from "./tasks-router.js";
+import { adminRouter } from "./admin-router.js";
+import { createRouter, publicQuery } from "./middleware.js";
 
 export const appRouter = createRouter({
   ping: publicQuery.query(() => ({ ok: true, ts: Date.now() })),

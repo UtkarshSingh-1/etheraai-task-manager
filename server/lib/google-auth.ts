@@ -1,10 +1,10 @@
 import type { Context } from "hono";
 import { setCookie } from "hono/cookie";
-import { env } from "./env";
-import { getSessionCookieOptions } from "./cookies";
+import { env } from "./env.js";
+import { getSessionCookieOptions } from "./cookies.js";
 import { Session } from "@contracts/constants";
-import { signSessionToken } from "./session";
-import { upsertUser } from "../queries/users";
+import { signSessionToken } from "./session.js";
+import { upsertUser } from "../queries/users.js";
 
 interface GoogleTokenResponse {
   access_token: string;
