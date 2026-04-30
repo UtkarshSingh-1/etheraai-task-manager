@@ -8,6 +8,26 @@ import { Errors } from "@contracts/errors";
 import { signSessionToken } from "./session";
 import { upsertUser } from "../queries/users";
 
+interface GoogleTokenResponse {
+  access_token: string;
+  expires_in: number;
+  token_type: string;
+  scope: string;
+  refresh_token?: string;
+  id_token?: string;
+}
+
+interface GoogleUserInfo {
+  sub: string;
+  name: string;
+  given_name?: string;
+  family_name?: string;
+  picture?: string;
+  email: string;
+  email_verified: boolean;
+  locale?: string;
+}
+
 async function exchangeGoogleCode(code: string, redirectUri: string) {
   const body = new URLSearchParams({
     code,
@@ -28,7 +48,7 @@ async function exchangeGoogleCode(code: string, redirectUri: string) {
     throw new Error(`Google token exchange failed: ${text}`);
   }
 
-  return resp.json();
+  return (await resp.json()) as GoogleTokenResponse;
 }
 
 async function getGoogleUserInfo(accessToken: string) {
@@ -40,7 +60,7 @@ async function getGoogleUserInfo(accessToken: string) {
     throw new Error("Failed to fetch Google user info");
   }
 
-  return resp.json();
+  return (await resp.json()) as GoogleUserInfo;
 }
 
 export function createGoogleOAuthCallbackHandler() {
