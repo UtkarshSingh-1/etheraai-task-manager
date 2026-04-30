@@ -2,18 +2,16 @@ import nodemailer from "nodemailer";
 import { env } from "./env";
 
 const transporter = nodemailer.createTransport({
-  host: "smtp.googlemail.com", // Alternative endpoint
-  port: 587,
-  secure: false, 
+  host: "smtp.gmail.com",
+  port: 465,
+  secure: true, // SSL
   auth: {
     user: env.smtpUser,
     pass: env.smtpPass,
   },
-  // Aggressive IPv4 force
   family: 4,
-  connectionTimeout: 10000, // 10 seconds
-  greetingTimeout: 10000,
-  socketTimeout: 15000,
+  connectionTimeout: 15000,
+  greetingTimeout: 15000,
 } as any);
 
 export async function sendEmail(to: string, subject: string, html: string) {
