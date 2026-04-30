@@ -3,8 +3,8 @@ import { env } from "./env";
 
 const transporter = nodemailer.createTransport({
   host: "smtp.gmail.com",
-  port: 587,
-  secure: false, // Use STARTTLS
+  port: 465,
+  secure: true, // Use Direct SSL
   auth: {
     user: env.smtpUser,
     pass: env.smtpPass,
