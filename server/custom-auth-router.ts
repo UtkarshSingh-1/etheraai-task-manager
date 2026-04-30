@@ -19,7 +19,7 @@ import * as cookie from "cookie";
 export const customAuthRouter = createRouter({
   requestSignupOtp: publicQuery
     .input(z.object({ email: z.string().email() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input }: { input: { email: string } }) => {
       const existing = await findUserByEmail(input.email);
       if (existing) {
         throw new TRPCError({
@@ -53,7 +53,7 @@ export const customAuthRouter = createRouter({
         otp: z.string().length(6, "OTP must be 6 digits"),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input }: { input: any }) => {
       // 1. Verify OTP
       const otp = await findValidOtp(input.email, input.otp, "VERIFY");
       if (!otp) {
@@ -94,7 +94,7 @@ export const customAuthRouter = createRouter({
         password: z.string(),
       })
     )
-    .mutation(async ({ input, ctx }) => {
+    .mutation(async ({ input, ctx }: { input: any; ctx: any }) => {
       const user = await findUserByEmail(input.email);
       if (!user || !user.password) {
         throw new TRPCError({
@@ -144,7 +144,7 @@ export const customAuthRouter = createRouter({
         type: z.enum(["VERIFY", "RESET"]),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input }: { input: any }) => {
       const otp = await findValidOtp(input.email, input.code, input.type);
       if (!otp) {
         throw new TRPCError({
@@ -170,7 +170,7 @@ export const customAuthRouter = createRouter({
         type: z.enum(["VERIFY", "RESET"]),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input }: { input: any }) => {
       const otpCode = generateOtp();
       await createOtp({ email: input.email, code: otpCode, type: input.type });
 
@@ -190,7 +190,7 @@ export const customAuthRouter = createRouter({
 
   forgotPassword: publicQuery
     .input(z.object({ email: z.string().email() }))
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input }: { input: any }) => {
       const user = await findUserByEmail(input.email);
       if (!user) {
         throw new TRPCError({
@@ -223,7 +223,7 @@ export const customAuthRouter = createRouter({
         newPassword: z.string().min(6),
       })
     )
-    .mutation(async ({ input }) => {
+    .mutation(async ({ input }: { input: any }) => {
       const otp = await findValidOtp(input.email, input.code, "RESET");
       if (!otp) {
         throw new TRPCError({
@@ -240,7 +240,7 @@ export const customAuthRouter = createRouter({
       return { success: true, message: "Password reset successfully" };
     }),
 
-  me: publicQuery.query(async ({ ctx }) => {
+  me: publicQuery.query(async ({ ctx }: { ctx: any }) => {
     if (!ctx.user) return null;
     return {
       id: ctx.user.id,

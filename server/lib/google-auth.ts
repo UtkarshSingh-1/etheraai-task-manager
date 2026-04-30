@@ -1,10 +1,8 @@
 import type { Context } from "hono";
 import { setCookie } from "hono/cookie";
-import * as cookie from "cookie";
-import { env } from "../lib/env";
-import { getSessionCookieOptions } from "../lib/cookies";
+import { env } from "./env";
+import { getSessionCookieOptions } from "./cookies";
 import { Session } from "@contracts/constants";
-import { Errors } from "@contracts/errors";
 import { signSessionToken } from "./session";
 import { upsertUser } from "../queries/users";
 
