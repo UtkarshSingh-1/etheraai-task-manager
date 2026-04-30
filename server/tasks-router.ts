@@ -12,6 +12,7 @@ import {
   deleteTask,
   updateTask,
 } from "./queries/tasks";
+import { awardXp } from "./queries/users";
 
 export const tasksRouter = createRouter({
   create: adminQuery
@@ -76,6 +77,12 @@ export const tasksRouter = createRouter({
       }
 
       await updateTaskStatus(input.id, input.status);
+
+      // Award XP when assigned member marks task DONE
+      if (input.status === "DONE" && !isAdmin && task.assignedTo !== null) {
+        await awardXp(Number(task.assignedTo), 50);
+      }
+
       return { success: true };
     }),
 
@@ -93,6 +100,7 @@ export const tasksRouter = createRouter({
         title: z.string().min(1).max(255).optional(),
         description: z.string().optional(),
         assignedTo: z.number().nullable().optional(),
+        dueDate: z.string().optional(),
       })
     )
     .mutation(async ({ input }) => {
@@ -100,6 +108,7 @@ export const tasksRouter = createRouter({
         title: input.title,
         description: input.description,
         assignedTo: input.assignedTo,
+        dueDate: input.dueDate,
       });
       return { success: true };
     }),

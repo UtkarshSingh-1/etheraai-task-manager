@@ -57,7 +57,7 @@ export async function createUser(data: {
   name: string;
   email: string;
   password: string;
-  role?: "MEMBER" | "ADMIN";
+  role: "MEMBER" | "ADMIN";
   isVerified?: boolean;
 }) {
   const result = await getDb()
@@ -66,7 +66,7 @@ export async function createUser(data: {
       name: data.name,
       email: data.email,
       password: data.password,
-      role: data.role ?? "MEMBER",
+      role: data.role,
       isVerified: data.isVerified ?? false,
       lastSignInAt: new Date(),
     });
@@ -125,4 +125,11 @@ export async function updateUser(id: number, data: {
     .update(schema.users)
     .set(data)
     .where(eq(schema.users.id, id));
+}
+
+export async function awardXp(userId: number, amount: number) {
+  await getDb()
+    .update(schema.users)
+    .set({ xp: sql`xp + ${amount}` })
+    .where(eq(schema.users.id, userId));
 }

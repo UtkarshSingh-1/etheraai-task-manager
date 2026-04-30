@@ -29,6 +29,9 @@ import {
   Edit2
 } from "lucide-react";
 import { toast } from "sonner";
+import { formatDistanceToNow, isPast } from "date-fns";
+import { Calendar } from "lucide-react";
+import { ConfettiBurst } from "@/components/ConfettiBurst";
 
 export default function TasksPage() {
   const { isAdmin, user } = useAuth();
@@ -41,8 +44,10 @@ export default function TasksPage() {
   const [description, setDescription] = useState("");
   const [projectId, setProjectId] = useState("");
   const [assigneeId, setAssigneeId] = useState<string | undefined>(undefined);
+  const [dueDate, setDueDate] = useState("");
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editTask, setEditTask] = useState<any>(null);
+  const [confetti, setConfetti] = useState(false);
 
   const createMutation = trpc.tasks.create.useMutation({
     onSuccess: () => {
@@ -74,8 +79,13 @@ export default function TasksPage() {
   });
 
   const updateStatusMutation = trpc.tasks.updateStatus.useMutation({
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       utils.tasks.list.invalidate();
+      if (variables.status === "DONE") {
+        setConfetti(true);
+        toast.success("🎉 Task completed! +50 Sparks earned!");
+        setTimeout(() => setConfetti(false), 200);
+      }
     },
     onError: (err) => toast.error(err.message),
   });
@@ -90,7 +100,8 @@ export default function TasksPage() {
       title,
       description: description || undefined,
       projectId: Number(projectId),
-      assignedTo: assigneeId ? Number(assigneeId) : undefined
+      assignedTo: assigneeId ? Number(assigneeId) : undefined,
+      dueDate: dueDate || undefined,
     });
   };
 
@@ -108,6 +119,7 @@ export default function TasksPage() {
 
   return (
     <div className="p-4 sm:p-8 max-w-6xl">
+      <ConfettiBurst trigger={confetti} />
       <div className="flex items-center justify-between mb-8">
         <div>
           <h1 className="text-2xl font-bold text-[#5B0E14]">Tasks</h1>
@@ -151,20 +163,16 @@ export default function TasksPage() {
                     </SelectContent>
                   </Select>
                 </div>
-                <div>
-                  <label className="text-sm font-medium text-[#5B0E14] block mb-1.5">Assign To</label>
-                  <Select value={assigneeId} onValueChange={setAssigneeId}>
-                    <SelectTrigger>
-                      <SelectValue placeholder="Select a team member" />
-                    </SelectTrigger>
-                    <SelectContent position="popper" className="max-h-96">
-                      {(users ?? []).map((u) => (
-                        <SelectItem key={u.id} value={String(u.id)}>
-                          {u.name}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
                   </Select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-[#5B0E14] block mb-1.5">Deadline</label>
+                  <Input 
+                    type="date" 
+                    value={dueDate} 
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDueDate(e.target.value)} 
+                    className="w-full"
+                  />
                 </div>
                 <Button type="submit" className="w-full bg-[#5B0E14] text-[#F1E194]" disabled={createMutation.isPending}>
                   {createMutation.isPending ? "Creating..." : "Create Task"}
@@ -188,7 +196,8 @@ export default function TasksPage() {
                 id: editTask.id,
                 title: editTask.title,
                 description: editTask.description,
-                assignedTo: editTask.assignedTo ? Number(editTask.assignedTo) : null
+                assignedTo: editTask.assignedTo ? Number(editTask.assignedTo) : null,
+                dueDate: editTask.dueDate || undefined,
               });
             }} className="space-y-4 mt-2">
                 <Input 
@@ -201,24 +210,17 @@ export default function TasksPage() {
                 value={editTask.description || ""} 
                 onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => setEditTask({...editTask, description: e.target.value})} 
               />
-              <div>
-                <label className="text-sm font-medium text-[#5B0E14] block mb-1.5">Reassign To</label>
-                <Select 
-                  value={editTask.assignedTo?.toString()} 
-                  onValueChange={(val) => setEditTask({...editTask, assignedTo: val === "null" ? null : Number(val)})}
-                >
-                  <SelectTrigger>
-                    <SelectValue placeholder="Select team member" />
-                  </SelectTrigger>
-                  <SelectContent position="popper" className="max-h-96">
-                    <SelectItem value="null">Unassigned</SelectItem>
-                    {(users ?? []).map((u) => (
-                      <SelectItem key={u.id} value={u.id.toString()}>{u.name}</SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
-              </div>
-              <Button type="submit" className="w-full bg-[#5B0E14] text-[#F1E194]" disabled={updateMutation.isPending}>
+                  </Select>
+                </div>
+                <div>
+                  <label className="text-sm font-medium text-[#5B0E14] block mb-1.5">Deadline</label>
+                  <Input 
+                    type="date" 
+                    value={editTask.dueDate?.split('T')[0] || ""} 
+                    onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditTask({...editTask, dueDate: e.target.value})} 
+                  />
+                </div>
+                <Button type="submit" className="w-full bg-[#5B0E14] text-[#F1E194]" disabled={updateMutation.isPending}>
                 Save Changes
               </Button>
             </form>
@@ -269,6 +271,23 @@ export default function TasksPage() {
                     </>
                   )}
                 </div>
+                {task.dueDate && (
+                  <div className={`flex items-center gap-1.5 mt-2 px-2.5 py-1 rounded-lg w-fit ${
+                    isPast(new Date(task.dueDate)) && task.status !== 'DONE'
+                      ? "bg-red-50 text-red-600 border border-red-100" 
+                      : "bg-neutral-50 text-neutral-500 border border-neutral-100"
+                  }`}>
+                    <Calendar className="w-3.5 h-3.5" />
+                    <span className="text-[10px] font-bold uppercase tracking-wider">
+                      {task.status === 'DONE' 
+                        ? `Completed` 
+                        : isPast(new Date(task.dueDate))
+                          ? `Overdue: ${formatDistanceToNow(new Date(task.dueDate))} ago`
+                          : `Due in ${formatDistanceToNow(new Date(task.dueDate))}`
+                      }
+                    </span>
+                  </div>
+                )}
               </div>
 
               <div className="flex items-center gap-4 shrink-0">

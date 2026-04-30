@@ -1,3 +1,4 @@
+import { useState } from "react";
 import { motion } from "framer-motion";
 import { trpc } from "@/providers/trpc";
 import { Spinner } from "@/components/ui/spinner";
@@ -5,12 +6,17 @@ import {
   ClipboardList,
   CheckCircle2,
   FolderKanban,
-  ArrowRight
+  ArrowRight,
+  Zap,
+  Trophy,
+  Calendar,
 } from "lucide-react";
 import { Link } from "react-router";
 import { Clock, Circle } from "lucide-react";
 import { useAuth } from "@/hooks/useAuth";
 import { toast } from "sonner";
+import { ConfettiBurst } from "@/components/ConfettiBurst";
+import { formatDistanceToNow, isPast } from "date-fns";
 
 const cardVariants = {
   hidden: { opacity: 0, y: 16 },
@@ -21,15 +27,42 @@ const cardVariants = {
   }),
 };
 
+// XP to level conversion: level = floor(xp / 100) + 1
+function getLevel(xp: number) {
+  return Math.floor(xp / 100) + 1;
+}
+
+function getXpProgress(xp: number) {
+  return xp % 100;
+}
+
+function getLevelTitle(level: number) {
+  if (level >= 20) return "Grandmaster";
+  if (level >= 15) return "Expert";
+  if (level >= 10) return "Senior";
+  if (level >= 5) return "Contributor";
+  return "Rookie";
+}
+
 export default function MemberDashboard() {
   const { user, isAdmin } = useAuth();
   const utils = trpc.useUtils();
   const { data: tasks, isLoading: tasksLoading } = trpc.tasks.list.useQuery();
   const { data: projects, isLoading: projectsLoading } = trpc.projects.list.useQuery();
+  const { data: me } = trpc.customAuth.me.useQuery();
+  const [confetti, setConfetti] = useState(false);
 
   const updateStatusMutation = trpc.tasks.updateStatus.useMutation({
-    onSuccess: () => {
+    onSuccess: (_, variables) => {
       utils.tasks.list.invalidate();
+      utils.customAuth.me.invalidate();
+      if (variables.status === "DONE") {
+        setConfetti(true);
+        toast.success("🎉 Task completed! +50 Sparks earned!", {
+          description: "Keep going to level up!",
+        });
+        setTimeout(() => setConfetti(false), 200);
+      }
     },
     onError: (err) => toast.error(err.message),
   });
@@ -41,6 +74,11 @@ export default function MemberDashboard() {
       </div>
     );
   }
+
+  const xp = (me as any)?.xp ?? 0;
+  const level = getLevel(xp);
+  const xpProgress = getXpProgress(xp);
+  const levelTitle = getLevelTitle(level);
 
   const totalTasks = tasks?.length ?? 0;
   const completedTasks = tasks?.filter((t) => t.status === "DONE").length ?? 0;
@@ -54,9 +92,38 @@ export default function MemberDashboard() {
 
   return (
     <div className="p-4 sm:p-8 max-w-6xl">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-[#5B0E14]">Welcome back, {user?.name}</h1>
-        <p className="text-sm text-neutral-500 mt-1">Focus on your productivity and project goals today.</p>
+      <ConfettiBurst trigger={confetti} />
+
+      <div className="mb-8 flex items-start justify-between flex-wrap gap-4">
+        <div>
+          <h1 className="text-2xl font-bold text-[#5B0E14]">Welcome back, {user?.name}</h1>
+          <p className="text-sm text-neutral-500 mt-1">Focus on your productivity and project goals today.</p>
+        </div>
+        {/* Ethera Spark Level Badge */}
+        <div className="flex items-center gap-3 bg-gradient-to-r from-[#5B0E14] to-[#8B1A22] text-[#F1E194] rounded-2xl px-5 py-3 shadow-lg shadow-[#5B0E14]/20">
+          <div className="flex flex-col items-center">
+            <Trophy className="w-5 h-5 mb-0.5" />
+            <span className="text-[9px] font-black uppercase tracking-widest opacity-70">Rank</span>
+          </div>
+          <div>
+            <div className="flex items-center gap-2">
+              <span className="text-xl font-black">Lv. {level}</span>
+              <span className="text-xs font-bold opacity-70 bg-white/10 px-2 py-0.5 rounded-full">{levelTitle}</span>
+            </div>
+            <div className="flex items-center gap-2 mt-1">
+              <div className="w-28 h-1.5 bg-white/20 rounded-full overflow-hidden">
+                <motion.div
+                  initial={{ width: 0 }}
+                  animate={{ width: `${xpProgress}%` }}
+                  transition={{ duration: 0.6, ease: "easeOut" }}
+                  className="h-full bg-[#F1E194] rounded-full"
+                />
+              </div>
+              <span className="text-[10px] font-bold opacity-70">{xpProgress}/100 XP</span>
+            </div>
+          </div>
+          <Zap className="w-4 h-4 opacity-60" />
+        </div>
       </div>
 
       <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-8">
@@ -103,6 +170,12 @@ export default function MemberDashboard() {
               <p className="text-sm font-medium opacity-80 leading-relaxed max-w-md">
                 You've completed {completedTasks} out of {totalTasks} tasks. You're doing great, keep focusing on those goals!
               </p>
+              {xp > 0 && (
+                <div className="mt-4 flex items-center gap-2 bg-white/10 rounded-xl px-3 py-2 w-fit">
+                  <Zap className="w-4 h-4" />
+                  <span className="text-xs font-bold">{xp} total Sparks earned</span>
+                </div>
+              )}
             </div>
             <CheckCircle2 className="absolute -right-12 -bottom-12 w-64 h-64 opacity-5" />
           </motion.div>
@@ -136,9 +209,23 @@ export default function MemberDashboard() {
                     </button>
                     <div>
                       <p className="text-sm font-bold text-neutral-900 group-hover:text-[#5B0E14] transition-colors">{task.title}</p>
-                      <p className="text-[10px] text-neutral-400 font-bold uppercase mt-0.5">
-                        {projects?.find(p => p.id === task.projectId)?.name ?? 'Project'}
-                      </p>
+                      <div className="flex items-center gap-2 mt-0.5">
+                        <p className="text-[10px] text-neutral-400 font-bold uppercase">
+                          {projects?.find(p => p.id === task.projectId)?.name ?? 'Project'}
+                        </p>
+                        {(task as any).dueDate && (
+                          <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded uppercase flex items-center gap-0.5 ${
+                            isPast(new Date((task as any).dueDate)) 
+                              ? "bg-red-50 text-red-600" 
+                              : "bg-neutral-100 text-neutral-500"
+                          }`}>
+                            <Calendar className="w-2.5 h-2.5" />
+                            {isPast(new Date((task as any).dueDate))
+                              ? `Overdue`
+                              : `Due ${formatDistanceToNow(new Date((task as any).dueDate))}`}
+                          </span>
+                        )}
+                      </div>
                     </div>
                   </div>
                   <StatusBadge status={task.status} />
@@ -146,6 +233,7 @@ export default function MemberDashboard() {
               ))}
               {(tasks ?? []).filter(t => t.status !== 'DONE').length === 0 && (
                 <div className="text-center py-10">
+                  <CheckCircle2 className="w-10 h-10 text-emerald-300 mx-auto mb-2" />
                   <p className="text-sm text-neutral-400 italic">No pending tasks. Great job!</p>
                 </div>
               )}

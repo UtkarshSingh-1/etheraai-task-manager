@@ -97,10 +97,17 @@ export async function updateTask(id: number, data: {
   title?: string;
   description?: string;
   assignedTo?: number | null;
+  dueDate?: string;
 }) {
+  const updateData: any = {};
+  if (data.title !== undefined) updateData.title = data.title;
+  if (data.description !== undefined) updateData.description = data.description;
+  if (data.assignedTo !== undefined) updateData.assignedTo = data.assignedTo;
+  if (data.dueDate !== undefined) updateData.dueDate = data.dueDate ? new Date(data.dueDate) : null;
+
   await getDb()
     .update(schema.tasks)
-    .set(data)
+    .set(updateData)
     .where(eq(schema.tasks.id, id));
 }
 

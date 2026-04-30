@@ -31,7 +31,8 @@ import {
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import { useAuth } from "@/hooks/useAuth";
-import { Edit2 } from "lucide-react";
+import { Edit2, Calendar } from "lucide-react";
+import { formatDistanceToNow, isPast } from "date-fns";
 
 export default function ProjectDetailsPage() {
   const { id } = useParams();
@@ -49,6 +50,7 @@ export default function ProjectDetailsPage() {
   const [assigneeId, setAssigneeId] = useState<string | undefined>(undefined);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editTask, setEditTask] = useState<any>(null);
+  const [dueDate, setDueDate] = useState("");
 
   const createMutation = trpc.tasks.create.useMutation({
     onSuccess: () => {
@@ -163,7 +165,8 @@ export default function ProjectDetailsPage() {
                       title, 
                       description, 
                       projectId,
-                      assignedTo: assigneeId ? Number(assigneeId) : undefined
+                      assignedTo: assigneeId ? Number(assigneeId) : undefined,
+                      dueDate: dueDate || undefined
                     });
                   }} className="space-y-4 mt-2">
                     <Input placeholder="Task title" value={title} onChange={(e: React.ChangeEvent<HTMLInputElement>) => setTitle(e.target.value)} />
@@ -181,6 +184,13 @@ export default function ProjectDetailsPage() {
                           ))}
                         </SelectContent>
                       </Select>
+                    <div className="space-y-2">
+                      <label className="text-xs font-bold text-neutral-500 uppercase">Deadline</label>
+                      <Input 
+                        type="date" 
+                        value={dueDate} 
+                        onChange={(e: React.ChangeEvent<HTMLInputElement>) => setDueDate(e.target.value)} 
+                      />
                     </div>
 
                     <Button type="submit" className="w-full bg-[#5B0E14] text-[#F1E194]" disabled={createMutation.isPending}>
@@ -205,7 +215,8 @@ export default function ProjectDetailsPage() {
                     id: editTask.id,
                     title: editTask.title,
                     description: editTask.description,
-                    assignedTo: editTask.assignedTo ? Number(editTask.assignedTo) : null
+                    assignedTo: editTask.assignedTo ? Number(editTask.assignedTo) : null,
+                    dueDate: editTask.dueDate || undefined
                   });
                 }} className="space-y-4 mt-2">
                   <Input 
@@ -235,6 +246,15 @@ export default function ProjectDetailsPage() {
                         ))}
                       </SelectContent>
                     </Select>
+                  </div>
+
+                  <div className="space-y-2">
+                    <label className="text-xs font-bold text-neutral-500 uppercase">Deadline</label>
+                    <Input 
+                      type="date" 
+                      value={editTask.dueDate?.split('T')[0] || ""} 
+                      onChange={(e: React.ChangeEvent<HTMLInputElement>) => setEditTask({...editTask, dueDate: e.target.value})} 
+                    />
                   </div>
 
                   <Button type="submit" className="w-full bg-[#5B0E14] text-[#F1E194]" disabled={updateMutation.isPending}>
@@ -283,6 +303,23 @@ export default function ProjectDetailsPage() {
                       </>
                     )}
                   </div>
+                  {task.dueDate && (
+                    <div className={`flex items-center gap-1 mt-1 px-1.5 py-0.5 rounded w-fit ${
+                      isPast(new Date(task.dueDate)) && task.status !== 'DONE'
+                        ? "bg-red-50 text-red-600" 
+                        : "bg-neutral-50 text-neutral-500"
+                    }`}>
+                      <Calendar className="w-2.5 h-2.5" />
+                      <span className="text-[9px] font-bold uppercase tracking-wider">
+                        {task.status === 'DONE' 
+                          ? `Completed` 
+                          : isPast(new Date(task.dueDate))
+                            ? `Overdue: ${formatDistanceToNow(new Date(task.dueDate))} ago`
+                            : `Due in ${formatDistanceToNow(new Date(task.dueDate))}`
+                        }
+                      </span>
+                    </div>
+                  )}
                 </div>
                 <StatusBadge status={task.status} />
                 {isAdmin && (

@@ -25,6 +25,7 @@ export const users = mysqlTable("users", {
     .notNull()
     .$onUpdate(() => new Date()),
   lastSignInAt: timestamp("lastSignInAt").defaultNow().notNull(),
+  xp: bigint("xp", { mode: "number" }).default(0).notNull(),
 });
 
 export const otps = mysqlTable("otps", {

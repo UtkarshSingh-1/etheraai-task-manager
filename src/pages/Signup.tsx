@@ -5,7 +5,7 @@ import { trpc } from "@/providers/trpc";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Briefcase, Eye, EyeOff, Chrome, ArrowLeft } from "lucide-react";
+import { Briefcase, Eye, EyeOff, Chrome, ArrowLeft, Shield } from "lucide-react";
 import { toast } from "sonner";
 
 function getOAuthUrl() {
@@ -33,6 +33,7 @@ export default function Signup() {
   const [password, setPassword] = useState("");
   const [otp, setOtp] = useState("");
   const [showPassword, setShowPassword] = useState(false);
+  const [role, setRole] = useState<"MEMBER" | "ADMIN">("MEMBER");
 
   const requestOtpMutation = trpc.customAuth.requestSignupOtp.useMutation({
     onSuccess: () => {
@@ -73,7 +74,7 @@ export default function Signup() {
       toast.error("Please enter a valid 6-digit code");
       return;
     }
-    registerMutation.mutate({ name, email, password, otp });
+    registerMutation.mutate({ name, email, password, otp, role });
   };
 
   return (
@@ -144,6 +145,42 @@ export default function Signup() {
                       className="absolute right-4 top-1/2 -translate-y-1/2 text-neutral-400 hover:text-[#5B0E14] transition-colors"
                     >
                       {showPassword ? <EyeOff className="w-4 h-4" /> : <Eye className="w-4 h-4" />}
+                    </button>
+                  </div>
+                </div>
+
+                <div className="space-y-1.5">
+                  <Label className="text-xs font-bold text-neutral-400 uppercase tracking-widest ml-1">Select Role</Label>
+                  <div className="grid grid-cols-2 gap-4">
+                    <button
+                      type="button"
+                      onClick={() => setRole("MEMBER")}
+                      className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${
+                        role === "MEMBER"
+                          ? "border-[#5B0E14] bg-[#5B0E14]/5 text-[#5B0E14]"
+                          : "border-neutral-100 hover:border-neutral-200 text-neutral-400"
+                      }`}
+                    >
+                      <div className={`p-2 rounded-lg mb-2 ${role === "MEMBER" ? "bg-[#5B0E14] text-[#F1E194]" : "bg-neutral-100"}`}>
+                        <Briefcase className="w-4 h-4" />
+                      </div>
+                      <span className="text-xs font-bold uppercase tracking-wider">Member</span>
+                      <p className="text-[10px] text-center mt-1 opacity-60">Update assigned tasks</p>
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => setRole("ADMIN")}
+                      className={`flex flex-col items-center justify-center p-4 rounded-2xl border-2 transition-all ${
+                        role === "ADMIN"
+                          ? "border-[#5B0E14] bg-[#5B0E14]/5 text-[#5B0E14]"
+                          : "border-neutral-100 hover:border-neutral-200 text-neutral-400"
+                      }`}
+                    >
+                      <div className={`p-2 rounded-lg mb-2 ${role === "ADMIN" ? "bg-[#5B0E14] text-[#F1E194]" : "bg-neutral-100"}`}>
+                        <Shield className="w-4 h-4" />
+                      </div>
+                      <span className="text-xs font-bold uppercase tracking-wider">Admin</span>
+                      <p className="text-[10px] text-center mt-1 opacity-60">Full project control</p>
                     </button>
                   </div>
                 </div>

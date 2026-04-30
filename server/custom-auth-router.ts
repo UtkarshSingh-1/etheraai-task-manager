@@ -51,6 +51,7 @@ export const customAuthRouter = createRouter({
         email: z.string().email("Invalid email address"),
         password: z.string().min(6, "Password must be at least 6 characters"),
         otp: z.string().length(6, "OTP must be 6 digits"),
+        role: z.enum(["MEMBER", "ADMIN"]),
       })
     )
     .mutation(async ({ input }: { input: any }) => {
@@ -78,6 +79,7 @@ export const customAuthRouter = createRouter({
         name: input.name,
         email: input.email,
         password: hashedPassword,
+        role: input.role,
         isVerified: true,
       });
 
