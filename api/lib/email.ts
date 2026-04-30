@@ -15,7 +15,7 @@ const transporter = nodemailer.createTransport({
   pool: true,
   maxConnections: 5,
   maxMessages: 100,
-});
+} as any);
 
 export async function sendEmail(to: string, subject: string, html: string) {
   if (!env.smtpUser || !env.smtpPass) {
