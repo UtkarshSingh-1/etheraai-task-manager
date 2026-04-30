@@ -2,10 +2,48 @@ import { motion } from "framer-motion";
 import { trpc } from "@/providers/trpc";
 import { Spinner } from "@/components/ui/spinner";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Shield, Users, Calendar } from "lucide-react";
+import { Shield, Users, Calendar, UserPlus } from "lucide-react";
+import { 
+  Dialog, 
+  DialogContent, 
+  DialogHeader, 
+  DialogTitle, 
+  DialogTrigger 
+} from "@/components/ui/dialog";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { 
+  Select, 
+  SelectContent, 
+  SelectItem, 
+  SelectTrigger, 
+  SelectValue 
+} from "@/components/ui/select";
+import { useState } from "react";
+import { toast } from "sonner";
 
 export default function UsersPage() {
+  const utils = trpc.useUtils();
   const { data: users, isLoading } = trpc.admin.users.useQuery();
+
+  const [open, setOpen] = useState(false);
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [role, setRole] = useState<"MEMBER" | "ADMIN">("MEMBER");
+
+  const createMutation = trpc.admin.createUser.useMutation({
+    onSuccess: () => {
+      toast.success("User created successfully");
+      utils.admin.users.invalidate();
+      setOpen(false);
+      setName("");
+      setEmail("");
+      setPassword("");
+      setRole("MEMBER");
+    },
+    onError: (err) => toast.error(err.message),
+  });
 
   if (isLoading) {
     return (
@@ -17,9 +55,58 @@ export default function UsersPage() {
 
   return (
     <div className="p-4 sm:p-8 max-w-6xl">
-      <div className="mb-8">
-        <h1 className="text-2xl font-bold text-[#5B0E14]">Team Members</h1>
-        <p className="text-sm text-neutral-500 mt-1">Manage and oversee all registered users in the platform</p>
+      <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-8">
+        <div>
+          <h1 className="text-2xl font-bold text-[#5B0E14]">Team Members</h1>
+          <p className="text-sm text-neutral-500 mt-1">Manage and oversee all registered users in the platform</p>
+        </div>
+        
+        <Dialog open={open} onOpenChange={setOpen}>
+          <DialogTrigger asChild>
+            <Button className="bg-[#5B0E14] hover:bg-[#4A0B10] text-[#F1E194] shadow-lg shadow-[#5B0E14]/20 px-6">
+              <UserPlus className="w-4 h-4 mr-2" />
+              Add Member
+            </Button>
+          </DialogTrigger>
+          <DialogContent className="max-w-md">
+            <DialogHeader>
+              <DialogTitle className="text-[#5B0E14] font-black uppercase tracking-tight">Add New Member</DialogTitle>
+            </DialogHeader>
+            <form onSubmit={(e) => {
+              e.preventDefault();
+              if (!name || !email || !password) return toast.error("Please fill all fields");
+              createMutation.mutate({ name, email, password, role });
+            }} className="space-y-4 pt-4">
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-[#5B0E14] uppercase tracking-widest">Full Name</label>
+                <Input value={name} onChange={e => setName(e.target.value)} placeholder="John Doe" className="bg-neutral-50 border-neutral-200" />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-[#5B0E14] uppercase tracking-widest">Email Address</label>
+                <Input type="email" value={email} onChange={e => setEmail(e.target.value)} placeholder="john@ethera.ai" className="bg-neutral-50 border-neutral-200" />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-[#5B0E14] uppercase tracking-widest">Initial Password</label>
+                <Input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="••••••••" className="bg-neutral-50 border-neutral-200" />
+              </div>
+              <div className="space-y-1.5">
+                <label className="text-[10px] font-black text-[#5B0E14] uppercase tracking-widest">System Role</label>
+                <Select value={role} onValueChange={(val: any) => setRole(val)}>
+                  <SelectTrigger className="bg-neutral-50 border-neutral-200">
+                    <SelectValue placeholder="Select role" />
+                  </SelectTrigger>
+                  <SelectContent position="popper">
+                    <SelectItem value="MEMBER">Member</SelectItem>
+                    <SelectItem value="ADMIN">Administrator</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+              <Button type="submit" className="w-full bg-[#5B0E14] text-[#F1E194] mt-4 py-6 text-sm font-black uppercase tracking-widest" disabled={createMutation.isPending}>
+                {createMutation.isPending ? "Creating..." : "Create Account"}
+              </Button>
+            </form>
+          </DialogContent>
+        </Dialog>
       </div>
 
       <div className="bg-white rounded-3xl border border-neutral-200 shadow-sm overflow-hidden">
