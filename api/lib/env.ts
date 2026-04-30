@@ -9,12 +9,9 @@ function required(name: string): string {
 }
 
 export const env = {
-  appId: required("APP_ID"),
-  appSecret: required("APP_SECRET"),
+  jwtSecret: required("JWT_SECRET"),
   isProduction: process.env.NODE_ENV === "production",
   databaseUrl: required("DATABASE_URL"),
-  kimiAuthUrl: process.env.KIMI_AUTH_URL ?? "",
-  kimiOpenUrl: process.env.KIMI_OPEN_URL ?? "",
   googleClientId: process.env.GOOGLE_CLIENT_ID ?? "",
   googleClientSecret: process.env.GOOGLE_CLIENT_SECRET ?? "",
   smtpUser: process.env.SMTP_USER ?? "",

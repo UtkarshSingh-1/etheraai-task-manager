@@ -5,7 +5,7 @@ import { env } from "../lib/env";
 import { getSessionCookieOptions } from "../lib/cookies";
 import { Session } from "@contracts/constants";
 import { Errors } from "@contracts/errors";
-import { signSessionToken } from "../kimi/session";
+import { signSessionToken } from "./session";
 import { upsertUser } from "../queries/users";
 
 async function exchangeGoogleCode(code: string, redirectUri: string) {

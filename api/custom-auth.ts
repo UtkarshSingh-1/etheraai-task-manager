@@ -7,7 +7,7 @@ import { Session } from "@contracts/constants";
 const JWT_ALG = "HS256";
 
 export async function signCustomSession(userId: number): Promise<string> {
-  const secret = new TextEncoder().encode(env.appSecret);
+  const secret = new TextEncoder().encode(env.jwtSecret);
   return new jose.SignJWT({ userId, type: "custom" })
     .setProtectedHeader({ alg: JWT_ALG })
     .setIssuedAt()
@@ -21,7 +21,7 @@ export async function verifyCustomSession(headers: Headers) {
   if (!token) return undefined;
 
   try {
-    const secret = new TextEncoder().encode(env.appSecret);
+    const secret = new TextEncoder().encode(env.jwtSecret);
     const { payload } = await jose.jwtVerify(token, secret, {
       algorithms: [JWT_ALG],
       clockTolerance: 60,
