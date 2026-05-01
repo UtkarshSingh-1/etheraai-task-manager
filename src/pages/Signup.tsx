@@ -33,6 +33,8 @@ export default function Signup() {
   const [showPassword, setShowPassword] = useState(false);
   const [role, setRole] = useState<"MEMBER" | "ADMIN">("MEMBER");
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const registerMutation = trpc.customAuth.directRegister.useMutation({
     onSuccess: () => {
       toast.success("Account created! Please sign in.");
@@ -41,10 +43,15 @@ export default function Signup() {
     onError: (err: any) => {
       toast.error(err.message);
     },
+    onSettled: () => {
+      setIsSubmitting(false);
+    }
   });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
+    if (isSubmitting) return;
+
     if (!name || !email || !password) {
       toast.error("Please fill in all fields");
       return;
@@ -53,6 +60,8 @@ export default function Signup() {
       toast.error("Password must be at least 6 characters");
       return;
     }
+    
+    setIsSubmitting(true);
     registerMutation.mutate({ name, email, password, role });
   };
 
@@ -161,9 +170,9 @@ export default function Signup() {
             <Button
               type="submit"
               className="w-full h-12 bg-[#5B0E14] hover:bg-[#4A0B10] text-[#F1E194] font-bold rounded-xl shadow-lg shadow-[#5B0E14]/10 transition-all active:scale-[0.98]"
-              disabled={registerMutation.isPending}
+              disabled={isSubmitting || registerMutation.isPending}
             >
-              {registerMutation.isPending ? "CREATING ACCOUNT..." : "CREATE ACCOUNT →"}
+              {isSubmitting || registerMutation.isPending ? "CREATING ACCOUNT..." : "CREATE ACCOUNT →"}
             </Button>
           </form>
 

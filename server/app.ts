@@ -15,7 +15,7 @@ app.all("/api/trpc/*", async (c) => {
     endpoint: "/api/trpc",
     req: c.req.raw,
     router: appRouter,
-    createContext: (opts) => createContext({ ...opts, resHeaders: c.res.headers }),
+    createContext: createContext,
   });
 });
 
