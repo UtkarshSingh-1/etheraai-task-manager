@@ -95,8 +95,9 @@ To test the application without creating a new account, you can use the followin
 ## 📂 Project Structure
 
 - `src/`: React frontend components, pages, and hooks.
-- `api/`: Hono backend routers and server logic.
-- `db/`: Database schema and Drizzle configuration.
+- `server/`: Hono backend routers, tRPC procedures, auth, and server logic.
+- `api/`: Serverless function entry points for deployment.
+- `db/`: Database schema, Drizzle configuration, and seed scripts.
 - `contracts/`: Type definitions and shared constants.
 
 ## 📝 License
